@@ -64,7 +64,7 @@ function answerHtml(objective: Objective, config: LevelConfig, evidence: Map<str
   switch (v.kind) {
     case 'answer': {
       const [first, ...rest] = v.accept;
-      const others = rest.slice(0, 2);
+      const others = rest.filter((item) => item.length <= 24).slice(0, 2);
       return `اكتب: ${isArabic(first) ? `<b>${esc(first)}</b>` : ltr(first)}${others.length ? ` <span class="also">(مقبول كمان: ${others.map(ltr).join(' / ')})</span>` : ''}`;
     }
     case 'evidence':
@@ -156,6 +156,7 @@ function pdfHtml(built: LevelMeta[], configs: Map<string, LevelConfig>, evidence
   .steps { list-style: none; counter-reset: step; margin: 3mm 0 0; padding: 0; }
   .steps > li { counter-increment: step; position: relative; padding-inline-start: 11mm; margin-top: 3mm; break-inside: avoid; }
   .steps > li::before { content: counter(step); position: absolute; inset-inline-start: 0; top: 0.5mm; width: 7mm; height: 7mm; border-radius: 50%; background: var(--act); color: #070b14; font-weight: 700; text-align: center; line-height: 7mm; }
+  .steps > li:last-child { break-inside: auto; }
   .steps h3 { margin: 0; font-size: 11.5pt; color: var(--act); }
   .steps p { margin: 0.5mm 0 0; }
   .apps { color: #8a9bb8; font-size: 10pt; }
