@@ -1,6 +1,6 @@
 import type { Act, LevelMeta } from '../engine/schema';
 
-// Hub map: 6 acts x 5 levels (30, the owner's final count). Level *content* lives in
+// Hub map: 27 levels, five acts of 5 and a short final act of 2 (the owner's final count). Level *content* lives in
 // src/levels/actN/lXX.ts and is lazy-loaded.
 
 type Row = [title: string, titleAr: string, skill: string, skillAr: string];
@@ -57,16 +57,12 @@ const ACTS: { title: string; titleAr: string; color: string; rows: Row[] }[] = [
     ],
   },
   {
-    // The owner's former Network, Threat Detection and Windows acts, merged into five bigger levels:
-    // every planned skill survives as an objective (ports, DNS, plain HTTP, firewall, process tree,
-    // base64, IOCs, detection rule, report).
+    // The response, and the end of the game (owner's call): containment, then the finale, which checks
+    // the cleanup and unmasks gh0st from clues spread over the whole game.
     title: 'Unmasking', titleAr: 'كشف القناع', color: '#ff1744',
     rows: [
-      ['Long Names', 'أسماء طويلة', 'Ports, DNS, plain HTTP, a tunnel and a block rule', 'المنافذ و DNS و HTTP المكشوف ونفق وقاعدة حظر'],
-      ['Imposters', 'المنتحلون', 'A strange process, its process tree and Run key', 'عملية غريبة وشجرة عملياتها ومفتاح تشغيلها'],
-      ['Read the Strings', 'اقرأ النصوص', 'Strings, a base64 config and indicators (IOCs)', 'النصوص وإعدادات base64 والمؤشرات'],
-      ['Event Horizon', 'أفق الأحداث', 'Windows logon events and a detection rule', 'أحداث الدخول بويندوز وقاعدة كشف'],
-      ['Unmasked', 'بلا قناع', 'The incident report: who is gh0st?', 'تقرير الحادثة: مين هو gh0st؟'],
+      ['Lockdown', 'إقفال', 'Containment: isolate, disable, block', 'الاحتواء: العزل والإيقاف والحظر'],
+      ['Unmasked', 'بلا قناع', 'Verify the cleanup, then: who is gh0st?', 'تأكد من التنظيف، وبعدين: مين هو gh0st؟'],
     ],
   },
 ];
@@ -83,7 +79,7 @@ export const acts: Act[] = ACTS.map((act, actIndex) => ({
       order,
       title: { en: title, ar: titleAr },
       skill: { en: skill, ar: skillAr },
-      boss: i === 4,
+      boss: i === act.rows.length - 1,
     };
   }),
 }));

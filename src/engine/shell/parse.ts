@@ -39,7 +39,7 @@ export function parseLine(line: string, vars: Record<string, string>): ParsedLin
   const readVar = (i: number): [string, number] => {
     const match = /^[A-Za-z_][A-Za-z0-9_]*/.exec(line.slice(i + 1));
     if (!match) return ['$', i];
-    return [vars[match[0]] ?? '', i + match[0].length];
+    return [Object.hasOwn(vars, match[0]) ? vars[match[0]] : '', i + match[0].length];
   };
 
   for (let i = 0; i < line.length; i++) {
@@ -90,14 +90,41 @@ export function parseLine(line: string, vars: Record<string, string>): ParsedLin
   return { pipeline, redirect };
 }
 
-/** Converts a shell glob (*, ?, [abc]) into an anchored RegExp. */
+const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\/-]/g, '\\$&');
+
+/**
+ * Converts a shell glob (*, ?, [abc], [!a-z]) into an anchored RegExp. Never throws: like bash,
+ * an unclosed or invalid bracket expression is taken literally.
+ */
 export function globToRegExp(glob: string, ignoreCase = false): RegExp {
   let source = '';
-  for (const c of glob) {
-    if (c === '*') source += '.*';
-    else if (c === '?') source += '.';
-    else if (c === '[' || c === ']') source += c;
-    else source += c.replace(/[.+^${}()|\\]/g, '\\$&');
+  let stars = 0;
+  for (let i = 0; i < glob.length; i++) {
+    const c = glob[i];
+    if (c === '*') {
+      // Runs of * mean the same as one; capping them keeps matching linear-ish on long names.
+      if (glob[i - 1] !== '*' && stars++ < 8) source += '.*';
+    } else if (c === '?') source += '.';
+    else if (c === '[') {
+      const end = glob.indexOf(']', i + 2);
+      const body = end > 0 ? glob.slice(i + 1, end) : '';
+      const negate = body.startsWith('!') || body.startsWith('^');
+      const members = (negate ? body.slice(1) : body).replace(/[\\\]^[]/g, '\\$&');
+      const valid = end > 0 && members.length > 0 && isValidClass(members);
+      if (valid) {
+        source += `[${negate ? '^' : ''}${members}]`;
+        i = end;
+      } else source += '\\[';
+    } else source += escapeRegExp(c);
   }
   return new RegExp(`^${source}$`, ignoreCase ? 'i' : '');
+}
+
+function isValidClass(members: string): boolean {
+  try {
+    new RegExp(`[${members}]`);
+    return true;
+  } catch {
+    return false;
+  }
 }

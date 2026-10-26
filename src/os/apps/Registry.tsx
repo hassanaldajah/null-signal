@@ -5,6 +5,12 @@ import './apps.css';
 
 const EMPTY: Record<string, Record<string, string>> = {};
 
+/** "HKLM\...\Run" -> "HKLM › … › Run": the hive tells same-named keys (HKLM and HKCU Run) apart. */
+function keyLabel(key: string): string {
+  const parts = key.split('\\');
+  return parts.length > 2 ? `${parts[0]} › … › ${parts[parts.length - 1]}` : parts.join(' › ');
+}
+
 /** Read-only registry snapshot: key list on the left, values of the selected key on the right. */
 export default function Registry() {
   const { t } = useI18n();
@@ -25,13 +31,13 @@ export default function Registry() {
           {shown.map((item) => (
             <li key={item}>
               <button className={item === key ? 'selected' : undefined} onClick={() => setKey(item)} title={item}>
-                {'· '.repeat(item.split('\\').length - 1)}{item.split('\\').pop()}
+                {keyLabel(item)}
               </button>
             </li>
           ))}
         </ul>
         <div className="reg-values">
-          <div className="logs-meta mono">{key}</div>
+          <div className="logs-meta mono reg-path">{key}</div>
           <table className="files-table mono">
             <thead><tr><th>{t('reg.name')}</th><th>{t('reg.data')}</th></tr></thead>
             <tbody>

@@ -167,7 +167,7 @@ export interface LevelConfig {
 export interface LevelMeta {
   id: string;
   act: number;
-  order: number; // 1..30
+  order: number; // 1..27
   title: L;
   skill: L;
   boss?: boolean;

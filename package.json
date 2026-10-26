@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "validate": "tsx scripts/validate-levels.ts",
+    "fuzz": "tsx scripts/shell-fuzz.ts",
     "solutions": "tsx scripts/export-solutions.ts",
     "check": "node scripts/browser-check.mjs",
     "sfx": "node scripts/gen-sfx.mjs",

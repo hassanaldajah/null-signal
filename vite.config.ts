@@ -26,6 +26,7 @@ const SECURITY_HEADERS: Record<string, string> = {
   'Referrer-Policy': 'no-referrer',
   'Permissions-Policy': 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
   'Cross-Origin-Opener-Policy': 'same-origin',
+  'Cross-Origin-Resource-Policy': 'same-site', // other sites cannot embed the game's files; al-hassan.dev still can
 };
 
 function cloudflareHeaders(): Plugin {

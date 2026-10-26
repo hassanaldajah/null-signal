@@ -116,7 +116,13 @@ export default function NexusOS() {
           })}
         </div>
         <span className="taskbar-clock mono">{clock.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-        <button className="btn ghost exit" onClick={() => { play('close'); go('hub'); }}>{t('os.exit')}</button>
+        <button className="btn ghost exit" title={t('os.exit')} aria-label={t('os.exit')} onClick={() => { play('close'); go('hub'); }}>
+          <svg className="exit-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 11 12 3l9 8" />
+            <path d="M5 10v10h14V10" />
+          </svg>
+          <span className="exit-label">{t('os.exit')}</span>
+        </button>
       </footer>
 
       <EchoCorner />

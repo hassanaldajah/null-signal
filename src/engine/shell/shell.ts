@@ -74,13 +74,19 @@ export class Shell {
     parsed.pipeline.forEach((tokens, index) => {
       const args = tokens.flatMap((token) => (token.glob ? this.expandGlob(token.value) : [token.value]));
       const [name, ...rest] = args;
-      const command = commands[name];
+      const command = Object.hasOwn(commands, name) ? commands[name] : undefined;
       if (!command) {
         errors.push(`${name}: command not found. Type 'help' to list commands.`);
         stdin = '';
         return;
       }
-      const result = command.run({ shell: this, vfs: this.vfs, args: rest, stdin, tty: index === parsed.pipeline.length - 1 });
+      let result: CommandResult;
+      try {
+        result = command.run({ shell: this, vfs: this.vfs, args: rest, stdin, tty: index === parsed.pipeline.length - 1 });
+      } catch {
+        // Safety net: a bug in one command must never break the terminal.
+        result = { out: '', err: `${name}: could not handle that input` };
+      }
       if (result.err) errors.push(result.err);
       if (result.clear) clear = true;
       stdin = result.out;

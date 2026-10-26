@@ -8,7 +8,8 @@ export interface Command {
   run: (ctx: CommandContext) => CommandResult;
 }
 
-export const commands: Record<string, Command> = {};
+/** Null prototype: a typed name like "__proto__" or "constructor" is never mistaken for a command. */
+export const commands: Record<string, Command> = Object.create(null);
 
 /** Later acts add their own tools (base64, sha256sum, strings, xxd...) through this. */
 export function register(name: string, command: Command): void {
@@ -122,11 +123,31 @@ function colorName(node: VNode, name: string, tty: boolean): string {
 const MAX_PATTERN = 256;
 /** A quantified group that is itself quantified, e.g. (a+)+ or (x*)* : catastrophic backtracking. */
 const NESTED_QUANTIFIER = /\((?:[^()\\]|\\.)*[+*}](?:[^()\\]|\\.)*\)\s*(?:[+*]|\{\d)/;
+/** A repeated group with alternatives, e.g. (a|aa)+ : the same text can match many ways. */
+const REPEATED_ALTERNATION = /\((?:[^()\\]|\\.)*\|(?:[^()\\]|\\.)*\)\s*(?:[+*]|\{\d+,)/;
+/** More unbounded repeats than this (e.g. .*.*.*.*x) backtrack polynomially on long lines. */
+const MAX_REPEATS = 3;
+
+/** Counts *, + and {n,} outside character classes and escapes. */
+function unboundedRepeats(source: string): number {
+  let count = 0;
+  let inClass = false;
+  for (let i = 0; i < source.length; i++) {
+    const c = source[i];
+    if (c === '\\') i++;
+    else if (inClass) inClass = c !== ']';
+    else if (c === '[') inClass = true;
+    else if (c === '*' || c === '+' || (c === '{' && /^\{\d+,\}/.test(source.slice(i)))) count++;
+  }
+  return count;
+}
 
 /** Compiles a player-typed regex, refusing patterns that could freeze the tab (ReDoS). */
 export function safeRegExp(source: string, flags: string): RegExp | string {
   if (source.length > MAX_PATTERN) return `pattern too long (max ${MAX_PATTERN} characters)`;
   if (NESTED_QUANTIFIER.test(source)) return 'pattern rejected: nested quantifiers like (a+)+ can hang the search';
+  if (REPEATED_ALTERNATION.test(source)) return 'pattern rejected: a repeated group of alternatives like (a|aa)+ can hang the search';
+  if (unboundedRepeats(source) > MAX_REPEATS) return `pattern rejected: more than ${MAX_REPEATS} unbounded repeats (* + {n,}) can hang the search`;
   try {
     return new RegExp(source, flags);
   } catch {
@@ -546,18 +567,22 @@ register('cut', {
     const { values, rest } = parseFlags(ctx.args, 'df');
     if (!values.f) return fail('cut: you must specify a list of fields');
     const separator = values.d ?? '\t';
-    const wanted = (count: number) =>
-      values.f.split(',').flatMap((part) => {
-        const [from, to] = part.split('-');
-        const start = Number.parseInt(from || '1', 10);
-        const end = part.includes('-') ? (to ? Number.parseInt(to, 10) : count) : start;
-        return Array.from({ length: Math.max(0, end - start + 1) }, (_, i) => start + i);
-      });
+    if (separator.length !== 1) return fail('cut: the delimiter must be a single character');
+    // Ranges stay as [start, end] pairs: "-f 1-999999999" must not build a billion-item list.
+    const ranges: [number, number][] = [];
+    for (const part of values.f.split(',')) {
+      const match = /^(\d{0,9})(-?)(\d{0,9})$/.exec(part);
+      if (!match || (!match[1] && !match[3])) return fail(`cut: invalid field value '${part}'`);
+      const start = match[1] ? Number(match[1]) : 1;
+      const end = match[2] ? (match[3] ? Number(match[3]) : Infinity) : start;
+      if (start < 1 || end < 1) return fail('cut: fields are numbered from 1');
+      if (end < start) return fail('cut: invalid decreasing range');
+      ranges.push([start, end]);
+    }
     const { sources, errors } = inputs(ctx, rest, 'cut');
-    const out = sources.flatMap(([, text]) => lines(text)).map((line) => {
-      const fields = line.split(separator);
-      return wanted(fields.length).map((n) => fields[n - 1]).filter((v) => v !== undefined).join(separator);
-    });
+    // Like GNU cut: each selected field once, in the order it appears in the line.
+    const out = sources.flatMap(([, text]) => lines(text)).map((line) =>
+      line.split(separator).filter((_, i) => ranges.some(([start, end]) => i + 1 >= start && i + 1 <= end)).join(separator));
     return { out: joinLines(out), err: errors.length ? joinLines(errors) : undefined };
   },
 });

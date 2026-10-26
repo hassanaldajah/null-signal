@@ -201,6 +201,9 @@ await step('L11 base64 decode', async () => {
   await p.getByText('Case closed').waitFor({ timeout: 10000 });
 });
 
+// The desktop flows are done: park that page so its render loop stops competing for the CPU.
+await p.goto('about:blank');
+
 await step('arabic hub', async () => {
   const ar = await page();
   await ar.goto(`${BASE}/?screen=hub&lang=ar&quality=low`);

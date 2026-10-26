@@ -12,13 +12,15 @@ so nothing in the game points at a real organization or host.
 - **Mei Chen** (`m.chen`), finance. Second phishing victim (Act 2).
 - **NovaBackup** (`novabackup.example`), backup vendor with approved VPN from `198.51.100.23`
   (contract V-2207). Treated as harmless noise in Act 1. It is not.
-- **Kade Mercer** (`k.mercer`), NovaBackup contractor = **gh0st**. Revealed in L30, the hardest level.
+- **Kade Mercer** (`k.mercer`), NovaBackup field engineer = **gh0st**. Revealed in L27, the final and hardest level.
 - **ECHO**, the player's assistant (Byte model). **The Ghost** taunts after each boss.
 
 ## Attacker infrastructure
 - Attacker IP `203.0.113.77` (VPN login, beacon target, phishing mail server).
 - Look-alike domain `helixdynamlcs.example` (i -> l). Second trick domain `verify-session.example`.
-- Exfil domain (Act 6) `cdn-sync.example`, DNS tunnel via `*.t.cdn-sync.example`.
+- Exfil domain (Acts 4-5) `cdn-sync.example`, data sent out through names under `t.cdn-sync.example`.
+- Quiet door: NovaBackup's shared vendor account `nova-svc` from the approved vendor VPN `198.51.100.23`,
+  used outside the contract window (Sundays 01:00-03:00 UTC) from Mar 11.
 
 ## Timeline (UTC, 2026)
 - Mar 02: Samir sets `Falcon#Rise26`.
@@ -26,8 +28,10 @@ so nothing in the game points at a real organization or host.
 - Mar 12 22:47: Samir submits credentials on the fake page (patient zero). 08:12 Mar 13: Mei Chen.
 - Mar 13 03:12: VPN login as s.haddad from `203.0.113.77`; password spray; j.ortiz falls.
 - Mar 13 03:16: beacon `/tmp/.X11-cache/.sync`; 03:38 cron persistence in `backup.sh`.
-- Mar 13-14: credential dumping (Act 3), web attack + history (Act 4), staging files (Act 5),
-  DNS-tunnel exfil and Windows malware on the finance PC via Mei's account (Act 6).
+- Mar 11 15:42 UTC: whiteboard photo at NovaBackup's office; 15:58 first `nova-svc` session outside the window.
+- Mar 13-14: credential dumping (Act 3), web attack + history (Act 4), staging files and the mailbox
+  sent out (Act 5). His next step (HELIX-FIN03 as m.chen) never happened: containment came first (Act 6).
+- Mar 16: containment (L26), cleanup verified and the report written (L27).
 
 ## Acts
 1. Linux Basics (L01-L05): get in, find the attacker IP, beacon, sprayed account, cron persistence.
@@ -43,16 +47,19 @@ so nothing in the game points at a real organization or host.
    on ws07: Mei Chen's mailbox disguised as `fonts.cache-7`, an ELF posing as `x11-icon.png`), deleted
    file recovery, EXIF (photo with author `kmercer`, GPS near NovaBackup office), a hidden message,
    hashing / chain of custody.
-6. Unmasking (L26-L30), the former Network, Threat Detection and Windows acts merged (owner's call):
-   L26 a packet capture (IPs/ports, DNS lookups, a plain-HTTP login, the DNS tunnel, a firewall block);
-   L27 the finance PC: an unfamiliar process, its process tree and its Run key; L28 strings in that
-   program (build path `C:\Users\kmercer\dev\sync\`), a base64 config and the IOC list; L29 Windows
-   logon events (`nova-svc` from the vendor VPN before each step) and a detection rule; L30 the
-   finale, the hardest level: the incident report, unmasking gh0st = Kade Mercer from every clue.
+6. Unmasking (L26-L27), the response and the end of the game (owner's call: the game ends at 27):
+   L26 containment: quarantine HELIX-FIN03 running, disable `nova-svc` (keep the read-only
+   `vendor-backup` pull), add the missing attacker IP to the firewall list, block his domains at the resolver;
+   L27 the finale, the hardest level: the cleanup missed the db01 crontab, FIN03's process tree and Run
+   keys are clean (the plan never ran), then the incident report unmasks gh0st = Kade Mercer from clues
+   across the whole game, a detection rule (vendor sessions outside the window) and the root-cause fix.
 
-## Identity clues (planted early, paid off in L30)
-- L08: phishing kit HTML comment `ops: km`.
-- L15: reused password works on the NovaBackup portal account `kmercer-admin`'s audit trail.
-- L23: EXIF Artist `kmercer`.
-- L28: build path `C:\Users\kmercer\dev\sync\`.
-- L29: vendor VPN `198.51.100.23` logon by `nova-svc` minutes before each attack step.
+## Identity clues (planted early, paid off in L27)
+- L08: phishing kit HTML comment `ops: km` (L27 asks for it from memory; it is not repeated there).
+- L14: `nova-svc` logs in from the vendor VPN at 03:05, minutes before the 03:12 VPN login.
+- L15: the NovaBackup portal account `kmercer-admin` downloaded the stolen export.
+- L23: EXIF Artist `kmercer`; GPS = NovaBackup's main office, Mar 11.
+- L26: `nova-svc` is a shared admin account, still enabled.
+- L27: the staff list has three "km" people (Karim Mansour remote; Kade Mercer and Katya Morel in the
+  main office) and no usernames; only `kmercer` + the office fit one person. The vendor gateway log shows
+  `nova-svc` outside the Sunday window from Mar 11, minutes before each attack step.

@@ -24,7 +24,7 @@ Vite + React + TypeScript, R3F, Zustand, xterm. Characters are built with headle
 
 - All case data (files, logs, emails, network tables, process lists) is static fictional data written
   by hand. Any "suspicious script" is a few lines of harmless placeholder text to read, never working code.
-- The owner's 40-level map is mirrored in `src/levels/manifest.ts`; follow it.
+- The owner's level map (27 levels; the game ends at L27) is mirrored in `src/levels/manifest.ts`; follow it.
 
 ## Owner rules
 - Reply to the owner in Arabic. Ask before any commit or push. Free tools and assets only.

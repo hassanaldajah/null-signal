@@ -8,10 +8,10 @@ an evidence board, and learn how real defenders detect, contain and prevent inci
 > any real system. Domains use the reserved `.example` TLD and IPs come from RFC 5737 documentation ranges.
 
 ## Features
-- 30 levels in 6 acts (Linux basics, phishing awareness, password hygiene, logs and timelines, file forensics,
-  and the unmasking: network, threat detection and Windows), each act ending with a boss case.
+- 27 levels in 6 acts (Linux basics, phishing awareness, password hygiene, logs and timelines, file forensics,
+  and the unmasking: containment, checking the cleanup and the final incident report), each act ending with a boss case.
 - Simulated apps: terminal (bash-like, read-only), files, notes, mail, log viewer, hex viewer, browser,
-  network capture table, processes, registry and an evidence board with linked cards.
+  processes, registry and an evidence board with linked cards.
 - 3-tier hints with score costs, debriefs with real-world tools and sources (NIST, MITRE ATT&CK, RFCs),
   ranks, achievements and local saves.
 - 3D characters made in Blender (headless scripts in `blender/`), mobile layout, RTL Arabic.

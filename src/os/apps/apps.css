@@ -760,6 +760,9 @@
   white-space: normal !important;
   overflow-wrap: anywhere;
 }
+.reg-path {
+  overflow-wrap: anywhere;
+}
 .capture-table {
   flex: 1.4;
   min-height: 0;
@@ -821,12 +824,21 @@
 }
 @media (max-width: 760px) {
   .procs-main, .reg-main, .browser-main {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* PID, name and user fit a phone; CPU, memory and start time stay in the detail pane. */
+  .procs th:nth-child(n + 4),
+  .procs td:nth-child(n + 4) {
+    display: none;
+  }
+  .procs td {
+    white-space: normal;
   }
   .procs-detail {
     width: auto;
     border-left: 0;
     border-top: 1px solid var(--line);
+    padding-right: 92px; /* keep the path clear of Byte in the corner */
   }
   .reg-keys, .browser-history {
     max-height: 30vh;

@@ -55,7 +55,7 @@ function corpus(config: LevelConfig): string {
 async function main() {
   // 1. Manifest
   const ids = levelsInOrder.map((level) => level.id);
-  if (ids.length !== 30) err('manifest', `expected 30 levels, found ${ids.length}`);
+  if (ids.length !== 27) err('manifest', `expected 27 levels, found ${ids.length}`);
   if (new Set(ids).size !== ids.length) err('manifest', 'duplicate level ids');
   levelsInOrder.forEach((level, index) => {
     if (level.order !== index + 1) err(level.id, `order ${level.order} should be ${index + 1}`);
