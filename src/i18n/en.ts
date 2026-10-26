@@ -1,6 +1,7 @@
 const en = {
   'app.tagline': 'Find the signal in the noise.',
   'boot.pressKey': 'PRESS ANY KEY TO CONNECT',
+  'boot.tap': 'TAP TO CONNECT',
   'boot.skip': 'Skip',
   'login.title': 'Investigator Access',
   'login.callsign': 'Callsign',

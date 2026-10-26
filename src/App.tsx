@@ -1,7 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { lazy, Suspense, useEffect } from 'react';
-import { unlockAudio } from './audio/sfx';
-import { preloadVoices } from './audio/voice';
+import { preload, unlockAudio } from './audio/sfx';
 import { useDocumentLanguage } from './i18n';
 import { useFlow } from './store/flow';
 import { useGame } from './store/game';
@@ -36,7 +35,7 @@ export default function App() {
   useEffect(() => {
     const unlock = () => {
       unlockAudio();
-      preloadVoices();
+      preload(['tick']);
     };
     window.addEventListener('pointerdown', unlock, { once: true });
     window.addEventListener('keydown', unlock, { once: true });

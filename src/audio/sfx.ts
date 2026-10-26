@@ -40,7 +40,7 @@ export function play(name: Sfx): void {
   howl.play();
 }
 
-/** Plays public/audio/<file>.wav at its own rate and volume (character voices, see voice.ts). */
+/** Plays public/audio/<file>.wav at its own rate and volume (dialogue ticks, see useTypewriter). */
 export function playFile(file: string, rate = 1, volume = 0.8): void {
   if (!unlocked) return;
   const howl = sound(file);
@@ -49,7 +49,7 @@ export function playFile(file: string, rate = 1, volume = 0.8): void {
   howl.volume(volume, id);
 }
 
-/** Starts downloading files ahead of time so the first syllable is not late. */
+/** Starts downloading files ahead of time so the first tick is not late. */
 export function preload(files: string[]): void {
   for (const file of files) sound(file);
 }

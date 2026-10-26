@@ -8,13 +8,13 @@ import { useTypewriter } from '../ui/useTypewriter';
 
 const SMALL_SCREEN = '(max-width: 760px)';
 
-/** ECHO (the Byte model) in 3D, bottom corner, with a typewriter speech bubble in Byte's voice. */
+/** ECHO (the Byte model) in 3D, bottom corner, with a typewriter speech bubble. */
 export default function EchoCorner() {
   const { text, clip, serial, settle } = useEcho();
   const reducedMotion = useGame((state) => state.settings.reducedMotion);
   const quality = useGame((state) => state.settings.quality);
   const [open, setOpen] = useState(true);
-  const { shown, done } = useTypewriter(text, serial, 'byte', reducedMotion);
+  const { shown, done } = useTypewriter(text, serial, reducedMotion);
 
   useEffect(() => {
     if (text) setOpen(true);

@@ -17,6 +17,11 @@
   opacity: 0.8;
   text-shadow: 0 0 6px rgba(57, 255, 136, 0.5);
   white-space: pre-wrap;
+  transition: opacity 0.6s;
+}
+/* Behind the logo the log is only texture (on phones it wraps under the title). */
+.boot-log.faded {
+  opacity: 0.18;
 }
 .boot-log .warn {
   color: var(--amber);
@@ -46,6 +51,22 @@
   letter-spacing: 0.4em;
   color: var(--cyan);
   animation: pulse 1.6s ease-in-out infinite;
+}
+@media (max-width: 760px) {
+  .boot-log {
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    font-size: 11px;
+  }
+  .boot-logo {
+    gap: 32px;
+    padding: 0 16px;
+    text-align: center;
+  }
+  .press {
+    letter-spacing: 0.25em;
+  }
 }
 @keyframes pulse {
   0%, 100% { opacity: 0.35; }

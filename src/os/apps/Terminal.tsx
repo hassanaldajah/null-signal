@@ -34,7 +34,7 @@ export default function Terminal() {
     const { shell } = runtime;
     const term = new XTerm({
       fontFamily: '"JetBrains Mono", Consolas, monospace',
-      fontSize: 14,
+      fontSize: window.matchMedia('(max-width: 760px)').matches ? 11.5 : 14,
       lineHeight: 1.25,
       cursorBlink: true,
       convertEol: true,

@@ -3,6 +3,7 @@ import type { UiKey } from './en';
 const ar: Partial<Record<UiKey, string>> = {
   'app.tagline': 'لاقِ الإشارة وسط الضجيج.',
   'boot.pressKey': 'اضغط أي زر للاتصال',
+  'boot.tap': 'المس الشاشة للاتصال',
   'boot.skip': 'تخطّي',
   'login.title': 'دخول المحقق',
   'login.callsign': 'الاسم الرمزي',

@@ -2,21 +2,20 @@ import { Canvas } from '@react-three/fiber';
 import { motion } from 'framer-motion';
 import { Suspense, useEffect, useRef } from 'react';
 import { play } from '../audio/sfx';
-import { mutter } from '../audio/voice';
 import { useRuntime } from '../engine/runtime';
 import { useI18n } from '../i18n';
 import Character from '../scenes/three/Character';
 import { useGame } from '../store/game';
 import { useTypewriter } from '../ui/useTypewriter';
 
-/** The partner briefs every case in her own voice; the detective's answer opens the desktop. */
+/** The partner briefs every case; the detective's answer opens the desktop. */
 export default function BriefingIntro({ onStart }: { onStart: () => void }) {
   const { t, tl } = useI18n();
   const { config, meta } = useRuntime((state) => state.runtime)!;
   const reducedMotion = useGame((state) => state.settings.reducedMotion);
   const quality = useGame((state) => state.settings.quality);
   const briefing = tl(config.briefing);
-  const { shown, done, finish } = useTypewriter(briefing, config.id, 'partner', reducedMotion);
+  const { shown, done, finish } = useTypewriter(briefing, config.id, reducedMotion);
   const box = useRef<HTMLParagraphElement>(null);
   const typed = useRef<HTMLSpanElement>(null);
 
@@ -28,7 +27,6 @@ export default function BriefingIntro({ onStart }: { onStart: () => void }) {
   const start = () => {
     finish();
     play('click');
-    mutter('detective');
     useRuntime.getState().startClock();
     onStart();
   };

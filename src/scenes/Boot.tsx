@@ -69,7 +69,7 @@ export default function Boot() {
 
   return (
     <div ref={root} className="boot crt">
-      <pre className="boot-log ltr">
+      <pre className={`boot-log ltr${showLogo ? ' faded' : ''}`}>
         {lines.map((line) => (
           <div key={line} className={line.includes('WARNING') ? 'warn' : undefined}>{line}</div>
         ))}
@@ -77,8 +77,8 @@ export default function Boot() {
       </pre>
       {showLogo && (
         <div className="boot-logo">
-          <GlitchLogo size={Math.min(84, window.innerWidth / 9)} />
-          <div className="press">{t('boot.pressKey')}</div>
+          <GlitchLogo size={84} />
+          <div className="press">{t(window.matchMedia('(pointer: coarse)').matches ? 'boot.tap' : 'boot.pressKey')}</div>
         </div>
       )}
     </div>

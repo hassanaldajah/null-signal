@@ -1,7 +1,6 @@
 import { motion, useAnimationControls } from 'framer-motion';
 import { type FormEvent, useState } from 'react';
 import { play } from '../audio/sfx';
-import { react } from '../audio/voice';
 import { useRuntime } from '../engine/runtime';
 import type { World } from '../engine/schema';
 import { useI18n } from '../i18n';
@@ -23,12 +22,10 @@ export default function Lockscreen({ lock, onUnlocked }: { lock: Lock; onUnlocke
     event.preventDefault();
     if (submit(lock.objective, value)) {
       play('success');
-      react('yip');
       onUnlocked();
       return;
     }
     play('error');
-    react('whine');
     setWrong(true);
     shake.start({ x: [0, -14, 12, -8, 6, 0], transition: { duration: 0.4 } });
   };

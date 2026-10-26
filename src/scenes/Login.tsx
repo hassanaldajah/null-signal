@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { type FormEvent, Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import type { Fog, PerspectiveCamera } from 'three';
 import { play } from '../audio/sfx';
-import { react } from '../audio/voice';
 import { type UiKey, useI18n } from '../i18n';
 import { useFlow } from '../store/flow';
 import { useGame } from '../store/game';
@@ -37,7 +36,7 @@ export default function Login() {
 
   const [step, setStep] = useState(-1);
   const line = LINES[step];
-  const { shown, done } = useTypewriter(line ? t(line.key) : '', step, line?.speaker ?? 'partner', reducedMotion);
+  const { shown, done } = useTypewriter(line ? t(line.key) : '', step, reducedMotion);
   const [byteClip, setByteClip] = useState<Clip>('idle');
   const byteSettled = useCallback(() => setByteClip('idle'), []);
 
@@ -52,7 +51,6 @@ export default function Login() {
     // Byte cheers once the detective has answered.
     if (last) {
       setByteClip('hop');
-      react('yip');
     }
     const timer = setTimeout(() => setStep((current) => current + 1), last ? 2600 : 800);
     return () => clearTimeout(timer);

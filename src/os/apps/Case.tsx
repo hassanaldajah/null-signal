@@ -1,7 +1,6 @@
 import { motion, useAnimationControls } from 'framer-motion';
 import { type FormEvent, useState } from 'react';
 import { play } from '../../audio/sfx';
-import { react } from '../../audio/voice';
 import { currentScore, useRuntime } from '../../engine/runtime';
 import type { Objective } from '../../engine/schema';
 import { useI18n } from '../../i18n';
@@ -96,12 +95,10 @@ function ObjectiveRow({ objective, state, isLock }: { objective: Objective; stat
   const attempt = (input: string) => {
     if (submit(objective.id, input)) {
       play('success');
-      react('yip');
       setFeedback('');
       return;
     }
     play('error');
-    react('whine');
     setFeedback(tl(objective.wrong) || t('case.wrong'));
     shake.start({ x: [0, -10, 8, -5, 3, 0], transition: { duration: 0.35 } });
   };

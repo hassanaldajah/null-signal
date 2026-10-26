@@ -1,12 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
-import { blip, LETTERS_PER_SYLLABLE, type Speaker } from '../audio/voice';
+import { playFile } from '../audio/sfx';
+
+/** Ticks are spaced like fast typing, not one per letter. */
+const TICK_GAP_MS = 75;
+let lastTick = 0;
+
+function tick(): void {
+  const now = performance.now();
+  if (now - lastTick < TICK_GAP_MS) return;
+  lastTick = now;
+  playFile('tick', 0.9 + Math.random() * 0.25, 0.18 + Math.random() * 0.08);
+}
 
 /**
- * Types `text` out two characters at a time while the speaker's voice blips along.
+ * Types `text` out two characters at a time with a soft key tick.
  * A new `restart` value (message serial, level id...) starts over even for the same text.
- * `instant` (reduced motion) shows everything at once with a single syllable.
+ * `instant` (reduced motion) shows everything at once.
  */
-export function useTypewriter(text: string, restart: unknown, speaker: Speaker, instant = false) {
+export function useTypewriter(text: string, restart: unknown, instant = false) {
   const [state, setState] = useState<{ token: unknown; text: string; count: number }>({ token: undefined, text: '', count: 0 });
   const skip = useRef(false);
 
@@ -15,7 +26,6 @@ export function useTypewriter(text: string, restart: unknown, speaker: Speaker, 
     if (!text) return;
     if (instant) {
       setState({ token: restart, text, count: text.length });
-      blip(speaker);
       return;
     }
     setState({ token: restart, text, count: 0 });
@@ -23,12 +33,11 @@ export function useTypewriter(text: string, restart: unknown, speaker: Speaker, 
     const timer = setInterval(() => {
       index = skip.current ? text.length : Math.min(text.length, index + 2);
       setState({ token: restart, text, count: index });
-      // A syllable every few letters, never on a space.
-      if (!skip.current && index % LETTERS_PER_SYLLABLE[speaker] === 0 && /\S/.test(text[index - 1] ?? '')) blip(speaker);
+      if (!skip.current && /\S/.test(text[index - 1] ?? '')) tick();
       if (index >= text.length) clearInterval(timer);
     }, 18);
     return () => clearInterval(timer);
-  }, [text, restart, speaker, instant]);
+  }, [text, restart, instant]);
 
   // Until the effect catches up with a new message, report nothing typed (never a stale "done").
   const current = state.token === restart && state.text === text;

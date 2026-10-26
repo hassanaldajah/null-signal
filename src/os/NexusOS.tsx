@@ -1,7 +1,6 @@
 import { AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { play } from '../audio/sfx';
-import { react } from '../audio/voice';
 import { useRuntime } from '../engine/runtime';
 import type { AppId } from '../engine/schema';
 import { useI18n } from '../i18n';
@@ -55,18 +54,13 @@ export default function NexusOS() {
   useEffect(() => {
     if (!fresh.length) return;
     play('evidence');
-    // After the yip for the answer that granted it: Byte reacts one sound at a time.
-    const sniff = setTimeout(() => react('sniff'), 450);
     toast(`${t('evidence.new')}: ${fresh.length}`, 'evidence');
-    return () => clearTimeout(sniff);
   }, [fresh, t]);
 
   useEffect(() => {
     if (!finished) return;
     play('success');
-    const bark = setTimeout(() => react('bark'), 300);
     useEcho.getState().say(tl(config.echo.success), 'talk');
-    return () => clearTimeout(bark);
   }, [finished, config, tl]);
 
   const unlocked = () => {
