@@ -1,0 +1,89 @@
+.login {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 440px);
+  align-items: center;
+  background: #04060c;
+}
+.login-canvas {
+  position: absolute !important;
+  inset: 0;
+}
+.login-card {
+  position: relative;
+  z-index: 2;
+  grid-column: 2;
+  margin-inline-end: 6vw;
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: stretch;
+}
+.login-card .glitch {
+  align-self: center;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--dim);
+  font-size: 14px;
+}
+.welcome {
+  margin: 0;
+  color: var(--green);
+}
+.lang-toggle {
+  align-self: center;
+  font-size: 14px;
+  padding: 6px 14px;
+}
+@media (max-width: 760px) {
+  .login {
+    grid-template-columns: 1fr;
+    align-items: end;
+  }
+  .login-card {
+    grid-column: 1;
+    margin: 0 16px 24px;
+  }
+}
+
+/* The partner and the detective talking above the cast (cyan and red, like their visors). */
+.login-dialogue {
+  position: absolute;
+  z-index: 3;
+  top: clamp(16px, 7vh, 72px);
+  inset-inline-start: 6vw;
+  width: min(440px, calc(100vw - 32px));
+  padding: 12px 16px;
+  pointer-events: none;
+}
+.login-dialogue p {
+  margin: 4px 0 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.login-dialogue.partner {
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 0 28px -12px var(--cyan);
+}
+.login-dialogue.partner .label {
+  color: var(--cyan);
+}
+.login-dialogue.detective {
+  border-color: rgba(255, 77, 109, 0.45);
+  box-shadow: 0 0 28px -12px var(--red);
+}
+.login-dialogue.detective .label {
+  color: var(--red);
+}
+@media (max-width: 760px) {
+  .login-dialogue {
+    top: 16px;
+    inset-inline: 16px;
+    width: auto;
+  }
+}

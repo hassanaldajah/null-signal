@@ -1,0 +1,405 @@
+.nexus {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: #03050b;
+}
+.desktop {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+.wallpaper {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px) 0 0 / 48px 48px,
+    radial-gradient(ellipse at 30% 20%, rgba(124, 77, 255, 0.18), transparent 60%),
+    radial-gradient(ellipse at 80% 90%, rgba(255, 43, 214, 0.12), transparent 55%),
+    #04060d;
+}
+.wallpaper .glitch {
+  font-size: clamp(42px, 9vw, 120px);
+  opacity: 0.08;
+}
+.desktop-icons {
+  position: absolute;
+  top: 18px;
+  inset-inline-start: 18px;
+  display: grid;
+  grid-auto-flow: row;
+  gap: 10px;
+  z-index: 1;
+}
+.desktop-icon {
+  width: 92px;
+  padding: 10px 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+.desktop-icon:hover:not(:disabled) {
+  background: rgba(0, 229, 255, 0.08);
+  border-color: var(--line);
+}
+.icon-glyph {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(124, 77, 255, 0.25));
+  border: 1px solid var(--line-strong);
+  color: var(--cyan);
+  font-size: 16px;
+  box-shadow: 0 0 18px -6px var(--cyan);
+}
+.window-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.os-window-rnd {
+  pointer-events: auto;
+}
+.os-window {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: rgba(8, 12, 22, 0.94);
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(0, 229, 255, 0.12);
+}
+.os-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 8px 0 12px;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.12), rgba(124, 77, 255, 0.08));
+  border-bottom: 1px solid var(--line);
+  cursor: grab;
+  user-select: none;
+  flex-shrink: 0;
+}
+.os-title-icon {
+  color: var(--cyan);
+  font-size: 13px;
+}
+.os-title {
+  flex: 1;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+.os-controls {
+  display: flex;
+  gap: 4px;
+}
+.os-controls button {
+  width: 30px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+}
+.os-controls button:hover {
+  background: rgba(0, 229, 255, 0.2);
+}
+.os-controls button.close:hover {
+  background: var(--red);
+}
+.os-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  position: relative;
+}
+.taskbar {
+  position: relative;
+  z-index: 3000;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  background: rgba(5, 8, 16, 0.92);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(12px);
+}
+.taskbar-level {
+  white-space: nowrap;
+  font-weight: 700;
+}
+.taskbar-apps {
+  flex: 1;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+}
+.task-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.task-btn.running {
+  border-bottom-color: var(--cyan);
+}
+.task-btn.active {
+  background: rgba(0, 229, 255, 0.12);
+}
+.task-btn:disabled {
+  opacity: 0.4;
+}
+.taskbar-clock {
+  color: var(--dim);
+  font-size: 13px;
+}
+.exit {
+  padding: 6px 12px;
+  font-size: 14px;
+}
+
+/* --- lockscreen --- */
+.lockscreen {
+  position: absolute;
+  inset: 0;
+  z-index: 2500;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(ellipse at center, rgba(10, 18, 40, 0.75), rgba(2, 3, 8, 0.96));
+  backdrop-filter: blur(10px);
+}
+.lock-card {
+  width: min(360px, calc(100vw - 32px));
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.lock-avatar {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, #10223a, #2a1340);
+  border: 2px solid var(--line-strong);
+}
+.lock-user {
+  font-size: 18px;
+}
+.lock-wrong {
+  color: var(--red);
+  font-size: 14px;
+}
+.lock-hint {
+  margin: 4px 0 0;
+  color: var(--dim);
+  font-size: 14px;
+  text-align: center;
+}
+.lock-card .btn {
+  width: 100%;
+}
+
+/* --- ECHO --- */
+.echo-corner {
+  position: absolute;
+  z-index: 2800;
+  inset-inline-end: 14px;
+  bottom: 62px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+.echo-bubble {
+  pointer-events: auto;
+  max-width: 340px;
+  padding: 12px 14px;
+  border-color: rgba(0, 229, 255, 0.45);
+  cursor: pointer;
+  box-shadow: 0 0 30px -10px var(--cyan);
+}
+.echo-bubble p {
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+.echo-avatar {
+  pointer-events: auto;
+  width: 120px;
+  height: 150px;
+  padding: 0;
+  border: 0;
+  background: radial-gradient(ellipse at 50% 80%, rgba(0, 229, 255, 0.18), transparent 70%);
+  cursor: pointer;
+}
+.cursor {
+  animation: blink 0.9s steps(1) infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+/* --- debrief --- */
+.debrief {
+  width: min(640px, 100%);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-color: rgba(57, 255, 136, 0.35);
+}
+.debrief-head {
+  position: relative;
+}
+.debrief-head h2 {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+}
+.debrief-rank {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 0;
+  font-family: var(--font-display);
+  font-size: 46px;
+  color: var(--green);
+  text-shadow: 0 0 24px rgba(57, 255, 136, 0.6);
+}
+.debrief-stats {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.debrief h3 {
+  margin: 0 0 4px;
+  font-size: 15px;
+  color: var(--cyan);
+  letter-spacing: 0.06em;
+}
+.debrief p {
+  margin: 0;
+}
+.debrief-source {
+  margin-top: 6px !important;
+  font-size: 13px;
+  color: var(--dim);
+}
+.tool-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip {
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  font-size: 13px;
+  color: var(--cyan);
+}
+.intel-found {
+  color: var(--amber);
+}
+.debrief-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 760px) {
+  .task-label,
+  .taskbar-level,
+  .taskbar-clock {
+    display: none;
+  }
+  .desktop-icons {
+    grid-template-columns: repeat(3, 92px);
+  }
+  .echo-avatar {
+    width: 84px;
+    height: 104px;
+  }
+  .echo-bubble {
+    max-width: calc(100vw - 120px);
+  }
+}
+
+/* --- partner briefing (start of every case) --- */
+.briefing-card {
+  width: min(720px, 100%);
+  display: grid;
+  grid-template-columns: 190px 1fr;
+  gap: 20px;
+  padding: 22px;
+  border-color: rgba(0, 229, 255, 0.4);
+}
+.briefing-portrait {
+  height: 250px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 35%, rgba(0, 229, 255, 0.16), transparent 70%), var(--panel-solid);
+}
+.briefing-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+.briefing-body h2 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+}
+.briefing-text {
+  margin: 0;
+  flex: 1;
+  max-height: 46vh;
+  overflow-y: auto;
+  font-size: 16px;
+  line-height: 1.6;
+  cursor: pointer;
+}
+.briefing-body .btn {
+  align-self: flex-end;
+  min-width: 140px;
+}
+@media (max-width: 760px) {
+  .briefing-card {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 16px;
+  }
+  .briefing-portrait {
+    height: 150px;
+  }
+  .briefing-text {
+    max-height: 38vh;
+  }
+  .briefing-body .btn {
+    align-self: stretch;
+  }
+}
