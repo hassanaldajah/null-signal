@@ -2,9 +2,9 @@
 // as a text file and as a PDF ("حل اللعبة.pdf": each level in four steps, rendered by headless Edge).
 // Spoilers: both files are written OUTSIDE the project (default: your Desktop) and must never ship.
 // Run: npm run solutions [-- <output.txt> [<output.pdf>]]
-import { readdirSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { chromium } from 'playwright-core';
 import type { EvidenceDef, L, LevelConfig, LevelMeta, Objective } from '../src/engine/schema';
@@ -51,6 +51,18 @@ function answer(objective: Objective, config: LevelConfig, evidence: Map<string,
 }
 
 // --- PDF ----------------------------------------------------------------------
+
+/** The game's own @fontsource faces, inlined as data URIs so the PDF looks the same on any machine. */
+function fontFaces(): string {
+  const root = join(import.meta.dirname, '..', 'node_modules', '@fontsource');
+  return ['noto-sans-arabic/400.css', 'noto-sans-arabic/700.css', 'jetbrains-mono/400.css']
+    .map((sheet) => {
+      const path = join(root, sheet);
+      return readFileSync(path, 'utf8').replace(/url\(\.\/files\/([^)]+\.woff2)\) format\('woff2'\), url\([^)]+\) format\('woff'\)/g, (_, file: string) =>
+        `url(data:font/woff2;base64,${readFileSync(join(dirname(path), 'files', file)).toString('base64')}) format('woff2')`);
+    })
+    .join('\n');
+}
 
 const esc = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 /** Hint text to HTML: `code` spans become <code>. */
@@ -124,11 +136,12 @@ function pdfHtml(built: LevelMeta[], configs: Map<string, LevelConfig>, evidence
 <meta charset="utf-8">
 <title>حل اللعبة - NULL SIGNAL</title>
 <style>
+${fontFaces()}
   @page { size: A4; margin: 14mm 13mm 16mm; background: #070b14; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   html { background: #070b14; }
-  body { margin: 0; color: #d9e4f5; font: 11.5pt/1.75 "Segoe UI", Tahoma, Arial, sans-serif; }
-  code { font: 9.5pt/1.5 Consolas, "Cascadia Mono", monospace; color: #7ff3ff; background: #0f1b2e; border: 1px solid #1d3150; border-radius: 4px; padding: 0 4px; unicode-bidi: isolate; overflow-wrap: anywhere; }
+  body { margin: 0; color: #d9e4f5; font: 11.5pt/1.75 "Noto Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif; }
+  code { font: 9.5pt/1.5 "JetBrains Mono", Consolas, "Cascadia Mono", monospace; color: #7ff3ff; background: #0f1b2e; border: 1px solid #1d3150; border-radius: 4px; padding: 0 4px; unicode-bidi: isolate; overflow-wrap: anywhere; }
   .cover { height: 255mm; display: flex; flex-direction: column; justify-content: center; gap: 10mm; break-after: page; }
   .brand { direction: ltr; text-align: right; font: 700 40pt/1 "Segoe UI", Arial, sans-serif; letter-spacing: 4px; color: #00e5ff; }
   .cover h1 { margin: 0; font-size: 30pt; color: #fff; }
@@ -191,7 +204,8 @@ function pdfHtml(built: LevelMeta[], configs: Map<string, LevelConfig>, evidence
 }
 
 async function writePdf(html: string): Promise<void> {
-  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  // Edge on the owner's Windows machine; elsewhere Playwright's Chromium (or CHROMIUM_PATH).
+  const browser = await chromium.launch({ channel: 'msedge', headless: true }).catch(() => chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH }));
   try {
     const page = await browser.newPage();
     await page.setContent(html, { waitUntil: 'load' });
