@@ -9,7 +9,31 @@ const level: LevelConfig = {
   requires: { levels: ['L20'], evidence: ['ev.l10.second-victim', 'ev.l03.artifact'] },
   briefing: {
     en: `Act 5: the files themselves. We imaged helix-ws07 and found a second hidden folder, ${ACT5.stash}: /var/tmp survives a reboot, /tmp does not. The names inside look harmless, but a name is just a label anyone can change. A file's real type is written in its first bytes. Find out what these files really are.`,
-    ar: `الفصل الخامس: الملفات نفسها. أخذنا نسخة من قرص helix-ws07 ولقينا مجلد مخفي ثاني، ${ACT5.stash}: مجلد /var/tmp بيضل بعد إعادة التشغيل، و /tmp لأ. الأسماء جوّا شكلها بريئة، بس الاسم مجرد ملصق أي حدا بيقدر يغيّره. النوع الحقيقي للملف مكتوب بأول بايتات فيه. اعرف شو هالملفات فعلاً.`,
+    ar: 'الفصل الخامس: الملفات نفسها. أخذنا نسخة من قرص الجهاز `helix-ws07` ووجدنا مجلداً مخفياً ثانياً هو `/var/tmp/.fontconfig-cache`: المجلد `/var/tmp` يبقى بعد إعادة التشغيل، أما `/tmp` فلا. الأسماء التي بداخله تبدو بريئة، لكن الاسم مجرد ملصق يستطيع أي شخص تغييره. النوع الحقيقي للملف مكتوب في بايتاته الأولى. اعرف ما هي هذه الملفات فعلاً.',
+  },
+  mission: {
+    goal: {
+      en: 'Find out what the files in the second hidden folder really are, by reading their first bytes instead of their names.',
+      ar: 'اعرف النوع الحقيقي للملفات في المجلد المخفي الثاني، بقراءة بايتاتها الأولى لا أسمائها.',
+    },
+    investigate: [
+      {
+        en: 'The hidden folder `var/tmp/.fontconfig-cache` inside the disk image. Use `ls -a` to see it.',
+        ar: 'المجلد المخفي `var/tmp/.fontconfig-cache` داخل نسخة القرص. استخدم `ls -a` لتراه.',
+      },
+      {
+        en: 'The output of `file *` inside that folder: the real type of each file.',
+        ar: 'ناتج الأمر `file *` داخل ذلك المجلد: النوع الحقيقي لكل ملف.',
+      },
+      {
+        en: 'The first bytes shown by `xxd -l 16 FILE`: `1f 8b` is gzip, `7f 45 4c 46` is a Linux program, `89 50 4e 47` is a PNG picture.',
+        ar: 'البايتات الأولى التي يعرضها الأمر `xxd -l 16 FILE`: القيمة `1f 8b` تعني gzip، و`7f 45 4c 46` تعني برنامج لينكس، و`89 50 4e 47` تعني صورة PNG.',
+      },
+    ],
+    success: {
+      en: 'You have named the hidden archive and its original name, and the program that pretends to be a picture. One evidence card is pinned.',
+      ar: 'تكون قد كتبت اسم الأرشيف المخفي واسمه الأصلي، والبرنامج المتنكّر في شكل صورة. تُثبَّت بطاقة دليل واحدة.',
+    },
   },
   apps: ['case', 'terminal', 'hex', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -44,24 +68,24 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'archive',
-      prompt: { en: 'Which file in the hidden folder is really a compressed archive?', ar: 'أي ملف بالمجلد المخفي هو بالحقيقة أرشيف مضغوط؟' },
+      prompt: { en: 'Which file in the hidden folder is really a compressed archive?', ar: 'أي ملف في المجلد المخفي هو في الحقيقة أرشيف مضغوط؟' },
       placeholder: 'file name',
       validator: { kind: 'answer', accept: ['fonts.cache-7', `${STASH}/fonts.cache-7`] },
       wrong: {
         en: 'Names lie. The folder starts with a dot (ls -a), and inside it `file *` reads the first bytes of every file.',
-        ar: 'الأسماء بتكذب. المجلد اسمه بيبلّش بنقطة (ls -a)، وجوّاه `file *` بيقرأ أول بايتات كل ملف.',
+        ar: 'الأسماء تكذب. اسم المجلد يبدأ بنقطة (استخدم `ls -a`)، وداخله يقرأ الأمر `file *` البايتات الأولى في كل ملف.',
       },
     },
     {
       id: 'name',
-      prompt: { en: 'gzip keeps the name a file had when it was compressed. What was this one called?', ar: 'gzip بيحتفظ بالاسم اللي كان للملف لما انضغط. شو كان اسم هاد؟' },
+      prompt: { en: 'gzip keeps the name a file had when it was compressed. What was this one called?', ar: 'برنامج gzip يحفظ الاسم الذي كان للملف عند ضغطه. ماذا كان اسم هذا الملف؟' },
       placeholder: 'name.tar',
       validator: { kind: 'answer', accept: [ACT5.mailbox] },
-      wrong: { en: 'Run file on the archive: it prints was "…".', ar: 'شغّل file على الأرشيف: بيطبع was "…".' },
+      wrong: { en: 'Run file on the archive: it prints was "…".', ar: 'شغّل `file` على الأرشيف: يطبع الاسم بعد كلمة `was`.' },
       grants: [
         {
           id: 'ev.l21.mailbox',
-          title: { en: "Mei Chen's mailbox staged for exfiltration", ar: 'صندوق بريد مي تشين مجهّز للتسريب' },
+          title: { en: "Mei Chen's mailbox staged for exfiltration", ar: 'صندوق بريد مي تشين مجهَّز للتسريب' },
           type: 'file',
           content: `ws07:${ACT5.stash}/fonts.cache-7 = gzip of ${ACT5.mailbox} (Mar 13 08:41)`,
           links: ['ev.l10.second-victim', 'ev.l03.artifact'],
@@ -70,56 +94,76 @@ const level: LevelConfig = {
     },
     {
       id: 'program',
-      prompt: { en: 'Which file is a Linux program dressed up as a picture?', ar: 'أي ملف هو برنامج لينكس متنكّر بشكل صورة؟' },
+      prompt: { en: 'Which file is a Linux program dressed up as a picture?', ar: 'أي ملف هو برنامج لينكس متنكّر في شكل صورة؟' },
       placeholder: 'file name',
       validator: { kind: 'answer', accept: ['x11-icon.png', `${STASH}/x11-icon.png`] },
-      wrong: { en: 'Linux programs start with the bytes 7f 45 4c 46 (".ELF"). Compare with xxd -l 16 <file>.', ar: 'برامج لينكس بتبلّش بالبايتات 7f 45 4c 46 (".ELF"). قارن بـ xxd -l 16 <الملف>.' },
+      wrong: { en: 'Linux programs start with the bytes 7f 45 4c 46 (".ELF"). Compare with xxd -l 16 <file>.', ar: 'برامج لينكس تبدأ بالبايتات `7f 45 4c 46` (أي `.ELF`). قارن بالأمر `xxd -l 16 FILE`.' },
     },
     {
       id: 'why',
-      prompt: { en: 'Why rename files like this?', ar: 'ليش يغيّروا أسماء الملفات هيك؟' },
+      prompt: { en: 'Why rename files like this?', ar: 'لماذا تُغيَّر أسماء الملفات بهذه الطريقة؟' },
       validator: {
         kind: 'choice',
         correct: 'label',
         options: [
-          { id: 'size', label: { en: 'To make the files smaller', ar: 'عشان الملفات تصير أصغر' } },
-          { id: 'label', label: { en: 'To slip past people and tools that judge a file by its name or extension', ar: 'عشان يمرقوا من الناس والأدوات اللي بتحكم على الملف من اسمه أو امتداده' } },
-          { id: 'linux', label: { en: 'Linux needs the right extension to open a file', ar: 'لينكس بحاجة للامتداد الصح ليفتح الملف' } },
+          { id: 'size', label: { en: 'To make the files smaller', ar: 'لتصبح الملفات أصغر' } },
+          { id: 'label', label: { en: 'To slip past people and tools that judge a file by its name or extension', ar: 'لتمرّ أمام الناس والأدوات التي تحكم على الملف من اسمه أو امتداده' } },
+          { id: 'linux', label: { en: 'Linux needs the right extension to open a file', ar: 'لأن لينكس يحتاج إلى الامتداد الصحيح ليفتح الملف' } },
         ],
       },
-      wrong: { en: 'Did the rename change a single byte inside the file?', ar: 'تغيير الاسم غيّر ولا بايت جوّا الملف؟' },
+      wrong: { en: 'Did the rename change a single byte inside the file?', ar: 'هل غيّر تبديل الاسم بايتاً واحداً داخل الملف؟' },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: `The folder is hidden: ls -a ${ACT5.image}/var/tmp, then cd into it and run file *`, ar: `المجلد مخفي: ls -a ${ACT5.image}/var/tmp، وبعدين ادخله بـ cd وشغّل file *` }, cost: 15 },
-    {
-      tier: 'direction',
-      text: {
-        en: 'file reads magic bytes. For a closer look: xxd -l 16 <file>. 1f 8b = gzip, 7f 45 4c 46 = ELF program, 89 50 4e 47 = PNG.',
-        ar: 'file بيقرأ البايتات السحرية. لنظرة أقرب: xxd -l 16 <الملف>. ‏1f 8b = gzip، و 7f 45 4c 46 = برنامج ELF، و 89 50 4e 47 = PNG.',
+  guide: {
+    nudge: {
+      en: 'The folder is hidden: run `ls -a var/tmp`, then `cd` into it and run `file *`.',
+      ar: 'المجلد مخفي: شغّل `ls -a var/tmp` ثم ادخل إليه بالأمر `cd` وشغّل `file *`.',
+    },
+    clue: {
+      en: '`file` reads magic bytes. For a closer look, run `xxd -l 16 FILE`. `1f 8b` is gzip, `7f 45 4c 46` is an ELF program, `89 50 4e 47` is PNG.',
+      ar: 'الأمر `file` يقرأ البايتات المميِّزة. لنظرة أدق شغّل `xxd -l 16 FILE`. القيمة `1f 8b` تعني gzip، و`7f 45 4c 46` تعني برنامج ELF، و`89 50 4e 47` تعني PNG.',
+    },
+    steps: {
+      archive: {
+        en: 'Run `ls -a var/tmp`, then `cd var/tmp/.fontconfig-cache` and `file *`. The line for `fonts.cache-7` says "gzip compressed data". Type `fonts.cache-7`.',
+        ar: 'شغّل `ls -a var/tmp` ثم `cd var/tmp/.fontconfig-cache` ثم `file *`. سطر الملف `fonts.cache-7` فيه العبارة `gzip compressed data`. اكتب `fonts.cache-7`.',
       },
-      cost: 30,
+      name: {
+        en: 'The same line continues with `was "m.chen-mailbox.tar"`. gzip keeps the original name inside the file. Type `m.chen-mailbox.tar`.',
+        ar: 'السطر نفسه يكمل بالعبارة `was "m.chen-mailbox.tar"`. برنامج gzip يحفظ الاسم الأصلي داخل الملف. اكتب `m.chen-mailbox.tar`.',
+      },
+      program: {
+        en: 'In the output of `file *`, `x11-icon.png` is reported as ELF, a Linux program. `xxd -l 16 x11-icon.png` starts with `7f45 4c46`. Type `x11-icon.png`.',
+        ar: 'في ناتج `file *` يظهر الملف `x11-icon.png` على أنه ELF، أي برنامج لينكس. والأمر `xxd -l 16 x11-icon.png` يبدأ بالقيمة `7f45 4c46`. اكتب `x11-icon.png`.',
+      },
+      why: {
+        en: 'Choose "To slip past people and tools that judge a file by its name or extension". Renaming did not change one byte inside.',
+        ar: 'اختر الجواب الذي يقول إن الهدف هو المرور أمام الناس والأدوات التي تحكم على الملف من اسمه أو امتداده. تغيير الاسم لم يغيّر بايتاً واحداً في الداخل.',
+      },
     },
-    { tier: 'near-solution', text: { en: `fonts.cache-7 is gzip and was "${ACT5.mailbox}". x11-icon.png starts with 7f 45 4c 46: a program.`, ar: `fonts.cache-7 هو gzip وكان اسمه "${ACT5.mailbox}". و x11-icon.png بيبلّش بـ 7f 45 4c 46: برنامج.` }, cost: 45 },
-  ],
+    concept: {
+      en: "A file's name is a label that anyone can change. Its real type is written in its first bytes, called the file signature. Check the signature with `file` or `xxd` before you decide what a file is.",
+      ar: 'اسم الملف ملصق يستطيع أي شخص تغييره. أما نوعه الحقيقي فمكتوب في بايتاته الأولى، وتسمى توقيع الملف. افحص التوقيع بالأمر `file` أو `xxd` قبل أن تحكم على نوع الملف.',
+    },
+  },
   rewards: { points: 150 },
   debrief: {
     concept: {
       en: "A file's name and extension are just a label anyone can change. Its real type is in its first bytes, the magic number or file signature: ff d8 ff for JPEG, 89 50 4e 47 for PNG, 25 50 44 46 (%PDF) for PDF, 1f 8b for gzip, 7f 45 4c 46 for Linux programs (ELF), 4d 5a (MZ) for Windows programs. Attackers rename files so they look boring to people and to tools that trust extensions (MITRE T1036.008). gzip even keeps the original name inside its header, so a renamed archive can still tell you what it was.",
-      ar: 'اسم الملف وامتداده مجرد ملصق أي حدا بيقدر يغيّره. نوعه الحقيقي موجود بأول بايتات فيه، اللي اسمها الرقم السحري أو توقيع الملف: ff d8 ff لـ JPEG، و 89 50 4e 47 لـ PNG، و 25 50 44 46 (%PDF) لـ PDF، و 1f 8b لـ gzip، و 7f 45 4c 46 لبرامج لينكس (ELF)، و 4d 5a (MZ) لبرامج ويندوز. المهاجمين بيغيّروا الأسماء عشان الملفات تبيّن عادية للناس وللأدوات اللي بتصدّق الامتداد (MITRE T1036.008). وكمان gzip بيحتفظ بالاسم الأصلي جوّا رأس الملف، فالأرشيف المعاد تسميته بيقدر يحكيلك شو كان.',
+      ar: 'اسم الملف وامتداده مجرد ملصق يستطيع أي شخص تغييره. نوعه الحقيقي موجود في بايتاته الأولى، وتسمى الرقم المميِّز أو توقيع الملف: `ff d8 ff` لصور JPEG، و`89 50 4e 47` لصور PNG، و`25 50 44 46` (أي `%PDF`) لملفات PDF، و`1f 8b` لملفات gzip، و`7f 45 4c 46` لبرامج لينكس (ELF)، و`4d 5a` (أي `MZ`) لبرامج ويندوز. المهاجمون يغيّرون الأسماء لتبدو الملفات عادية للناس وللأدوات التي تصدّق الامتداد (MITRE T1036.008). وبرنامج gzip يحفظ الاسم الأصلي داخل رأس الملف، فالأرشيف الذي غُيّر اسمه يستطيع أن يخبرك ماذا كان.',
     },
     realTools: ['file', 'xxd / hexdump', 'TrID', 'YARA', 'DLP content inspection'],
     takeaway: {
       en: 'Trust bytes, not names. Check the signature before you decide what a file is.',
-      ar: 'صدّق البايتات، مش الأسماء. افحص التوقيع قبل ما تقرّر شو الملف.',
+      ar: 'صدّق البايتات لا الأسماء. افحص التوقيع قبل أن تحكم على نوع الملف.',
     },
     source: 'MITRE ATT&CK T1036.008 (Masquerade File Type); RFC 1952 (GZIP file format); Gary Kessler, File Signatures Table',
   },
   echo: {
-    intro: { en: "New act, new rule: names lie, bytes don't. Let's open gh0st's suitcase.", ar: 'فصل جديد وقاعدة جديدة: الأسماء بتكذب والبايتات لأ. خلّينا نفتح شنطة gh0st.' },
+    intro: { en: "New act, new rule: names lie, bytes don't. Let's open gh0st's suitcase.", ar: 'فصل جديد وقاعدة جديدة: الأسماء تكذب والبايتات لا تكذب. لنفتح حقيبة gh0st.' },
     success: {
       en: "Mei Chen's whole mailbox, disguised as a font cache, next to a program pretending to be an icon. Next: what did they try to throw away?",
-      ar: 'صندوق بريد مي تشين كامل، متنكّر كملف خطوط، وجنبه برنامج عامل حاله أيقونة. الجاي: شو حاولوا يرموا؟',
+      ar: 'صندوق بريد مي تشين كاملاً، متنكّراً في شكل ملف خطوط، وبجانبه برنامج يدّعي أنه أيقونة. التالي: ماذا حاولوا أن يرموا؟',
     },
   },
   solution: `ls -a ${ACT5.image}/var/tmp -> .fontconfig-cache; cd there; file * -> fonts.cache-7: gzip, was "${ACT5.mailbox}"; x11-icon.png: ELF (xxd -l 16 -> 7f45 4c46). Choice: label.`,

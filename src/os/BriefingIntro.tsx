@@ -6,6 +6,7 @@ import { useRuntime } from '../engine/runtime';
 import { useI18n } from '../i18n';
 import Character from '../scenes/three/Character';
 import { useGame } from '../store/game';
+import Rich, { plainText } from '../ui/Rich';
 import { useTypewriter } from '../ui/useTypewriter';
 
 /** The partner briefs every case; the detective's answer opens the desktop. */
@@ -15,7 +16,7 @@ export default function BriefingIntro({ onStart }: { onStart: () => void }) {
   const reducedMotion = useGame((state) => state.settings.reducedMotion);
   const quality = useGame((state) => state.settings.quality);
   const briefing = tl(config.briefing);
-  const { shown, done, finish } = useTypewriter(briefing, config.id, reducedMotion);
+  const { shown, done, finish } = useTypewriter(plainText(briefing), config.id, reducedMotion);
   const box = useRef<HTMLParagraphElement>(null);
   const typed = useRef<HTMLSpanElement>(null);
 
@@ -60,11 +61,12 @@ export default function BriefingIntro({ onStart }: { onStart: () => void }) {
           {/* The hidden full text reserves the final height, so nothing below it moves while she talks. */}
           <p ref={box} className="briefing-text typed-text" onClick={finish}>
             <span ref={typed}>
-              {shown}
+              <Rich text={briefing} limit={shown.length} />
               {!done && <span className="cursor">▍</span>}
             </span>
-            <span className="typed-text-space" aria-hidden="true">{briefing}</span>
+            <span className="typed-text-space" aria-hidden="true"><Rich text={briefing} /></span>
           </p>
+          <p className="briefing-goal"><span className="label">{t('guide.mission')}</span> <Rich text={tl(config.mission.goal)} /></p>
           <button className="btn primary" autoFocus onClick={start}>{t('brief.reply')}</button>
         </div>
       </motion.div>

@@ -15,7 +15,31 @@ const level: LevelConfig = {
   requires: { levels: ['L21'], evidence: ['ev.l21.mailbox', 'ev.l18.exfil'] },
   briefing: {
     en: `The stash on ws07 looks tidy: x11-helper's usage mentions a log, yet there is no log, and the photo gh0st worked from is gone too. They deleted things. But on a Linux desktop, "deleted" does not always mean gone. Start in Samir's home in the image: check what rm really did in his shell, then find out where the files went, where they came from and when they were deleted.`,
-    ar: `المخبأ على ws07 شكله مرتّب: طريقة استخدام x11-helper بتذكر ملف سجل، بس ما في سجل، والصورة اللي اشتغل منها gh0st كمان مش موجودة. حذفوا أشياء. بس على سطح مكتب لينكس، "انحذف" مش دايماً معناها راح. ابدأ من مجلد سمير بالنسخة: افحص شو عمل rm فعلاً بالطرفية تبعته، وبعدين اعرف وين راحت الملفات، ومن وين إجت، وإيمتى انحذفت.`,
+    ar: 'المخبأ على الجهاز `helix-ws07` يبدو مرتّباً: شرح استخدام البرنامج `x11-helper` يذكر ملف سجل، لكن لا يوجد سجل، والصورة التي اعتمد عليها gh0st اختفت أيضاً. لقد حذفوا أشياء. لكن في لينكس بواجهة سطح المكتب، «حُذف» لا تعني دائماً أنه اختفى. ابدأ من مجلد سمير الرئيسي في نسخة القرص: افحص ماذا يفعل الأمر `rm` فعلاً في طرفيته، ثم اعرف أين ذهبت الملفات، ومن أين جاءت، ومتى حُذفت.',
+  },
+  mission: {
+    goal: {
+      en: 'Find the files the attacker "deleted" on Samir\'s computer, and learn where they came from and when they were deleted.',
+      ar: 'اعثر على الملفات التي «حذفها» المهاجم من جهاز سمير، واعرف من أين جاءت ومتى حُذفت.',
+    },
+    investigate: [
+      {
+        en: "The hidden files in Samir's home folder: `.bashrc` and `.bash_aliases` show what `rm` really does.",
+        ar: 'الملفات المخفية في مجلد سمير الرئيسي: الملفان `.bashrc` و`.bash_aliases` يبيّنان ماذا يفعل الأمر `rm` فعلاً.',
+      },
+      {
+        en: 'The Trash folder `.local/share/Trash`: `files/` holds the deleted files and `info/` holds one `.trashinfo` note for each.',
+        ar: 'مجلد سلة المحذوفات `.local/share/Trash`: المجلد `files/` فيه الملفات المحذوفة، والمجلد `info/` فيه ورقة `.trashinfo` لكل ملف.',
+      },
+      {
+        en: "The file `README-image.txt` at the top of the image: it gives the computer's time difference from UTC.",
+        ar: 'الملف `README-image.txt` في أعلى نسخة القرص: يذكر فرق توقيت الجهاز عن UTC.',
+      },
+    ],
+    success: {
+      en: 'You have named the command behind `rm`, the original path of `send.log`, the deletion time in UTC, and whether the mailbox left the company.',
+      ar: 'تكون قد كتبت الأمر الذي يعمل بدل `rm`، والمسار الأصلي للملف `send.log`، ووقت الحذف بتوقيت UTC، وعرفت هل خرج صندوق البريد من الشركة.',
+    },
   },
   apps: ['case', 'terminal', 'files', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -58,38 +82,38 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'alias',
-      prompt: { en: "In Samir's shell, rm does not really delete. What command does it run instead?", ar: 'بطرفية سمير، rm ما بيحذف فعلاً. شو الأمر اللي بيشغّله بداله؟' },
+      prompt: { en: "In Samir's shell, `rm` does not really delete. What command does it run instead?", ar: 'في طرفية سمير، الأمر `rm` لا يحذف فعلاً. ما الأمر الذي يعمل بدلاً منه؟' },
       placeholder: 'command',
       validator: { kind: 'answer', accept: ['trash-put', "alias rm='trash-put'", 'alias rm=trash-put'] },
       wrong: {
-        en: 'Shortcuts (aliases) live in the shell start-up files: hidden files in the home folder. ls -a, then read what .bashrc loads.',
-        ar: 'الاختصارات (alias) موجودة بملفات بداية الطرفية: ملفات مخفية بمجلد المستخدم. ‏ls -a، وبعدين اقرأ شو بيحمّل .bashrc.',
+        en: 'Shortcuts (aliases) live in the shell start-up files: hidden files in the home folder. Run `ls -a`, then read what `.bashrc` loads.',
+        ar: 'الاختصارات (alias) موجودة في ملفات بدء الطرفية، وهي ملفات مخفية في المجلد الرئيسي. شغّل `ls -a` ثم اقرأ ما يحمّله الملف `.bashrc`.',
       },
     },
     {
       id: 'origin',
-      prompt: { en: `The Trash keeps a note for every file it holds. Where on ws07 did ${ACT5.sendLog} live before it was deleted? (full path)`, ar: `السلة بتحتفظ بورقة لكل ملف فيها. وين كان ${ACT5.sendLog} على ws07 قبل ما ينحذف؟ (المسار الكامل)` },
+      prompt: { en: 'The Trash keeps a note for every file it holds. Where on ws07 did `send.log` live before it was deleted? (full path)', ar: 'سلة المحذوفات تحفظ ورقة لكل ملف فيها. أين كان الملف `send.log` على الجهاز ws07 قبل حذفه؟ (المسار الكامل)' },
       placeholder: '/path/file',
       validator: { kind: 'answer', accept: [`${ACT5.stash}/${ACT5.sendLog}`, `${ACT5.image}${ACT5.stash}/${ACT5.sendLog}`] },
       wrong: {
-        en: 'The Trash has two folders: files/ holds the files, info/ holds one .trashinfo note per file. Read the note: Path= is where it came from.',
-        ar: 'السلة فيها مجلدين: files/ فيه الملفات، و info/ فيه ورقة .trashinfo لكل ملف. اقرأ الورقة: Path= هو المكان اللي إجا منه.',
+        en: 'The Trash has two folders: `files/` holds the files, `info/` holds one `.trashinfo` note per file. Read the note: `Path=` is where it came from.',
+        ar: 'في السلة مجلدان: `files/` فيه الملفات، و`info/` فيه ورقة `.trashinfo` لكل ملف. اقرأ الورقة: سطر `Path=` هو المكان الذي جاء منه الملف.',
       },
     },
     {
       id: 'when',
-      prompt: { en: 'When was it deleted? Give the time in UTC (HH:MM).', ar: 'إيمتى انحذف؟ اكتب الوقت بـ UTC ‏(HH:MM).' },
+      prompt: { en: 'When was it deleted? Give the time in UTC (HH:MM).', ar: 'متى حُذف؟ اكتب الوقت بتوقيت UTC (بصيغة HH:MM).' },
       placeholder: 'HH:MM',
       validator: { kind: 'answer', accept: ['08:58', '08:58:31'] },
       derived: `DeletionDate=${LOCAL_DELETED} is ws07 local time (README: UTC${ACT5.localOffset}); minus 2 hours = 08:58 UTC.`,
       wrong: {
-        en: 'DeletionDate has no zone: the Trash writes the computer\'s local time. The image README tells you ws07\'s offset from UTC.',
-        ar: 'DeletionDate ما فيه منطقة زمنية: السلة بتكتب الوقت المحلي للجهاز. ملف README بالنسخة بيحكيلك قديش ws07 بعيد عن UTC.',
+        en: "`DeletionDate` has no zone: the Trash writes the computer's local time. The image README tells you ws07's offset from UTC.",
+        ar: 'القيمة `DeletionDate` ليس فيها منطقة زمنية: السلة تكتب التوقيت المحلي للجهاز. ملف `README-image.txt` في نسخة القرص يذكر فرق توقيت الجهاز ws07 عن UTC.',
       },
       grants: [
         {
           id: 'ev.l22.trash',
-          title: { en: "gh0st's deletes landed in Samir's Trash", ar: 'اللي حذفه gh0st وقع بسلة سمير' },
+          title: { en: "gh0st's deletes landed in Samir's Trash", ar: 'ما حذفه gh0st وقع في سلة محذوفات سمير' },
           type: 'file',
           content: `${ACT5.sendLog} + ${ACT5.photo} from ${ACT5.stash}, deleted Mar 13 08:58 UTC (rm = trash-put)`,
           links: ['ev.l21.mailbox'],
@@ -98,21 +122,21 @@ const level: LevelConfig = {
     },
     {
       id: 'sent',
-      prompt: { en: `Read the recovered ${ACT5.sendLog}. Did Mei Chen's mailbox leave Helix?`, ar: `اقرأ ${ACT5.sendLog} اللي رجّعناه. صندوق بريد مي تشين طلع من Helix؟` },
+      prompt: { en: "Read the recovered `send.log`. Did Mei Chen's mailbox leave Helix?", ar: 'اقرأ الملف `send.log` الذي استعدناه. هل خرج صندوق بريد مي تشين من Helix؟' },
       validator: {
         kind: 'choice',
         correct: 'all',
         options: [
-          { id: 'none', label: { en: 'No: it was deleted before it was sent', ar: 'لأ: انحذف قبل ما ينبعت' } },
-          { id: 'part', label: { en: 'Only part of it: the send stopped at a timeout', ar: 'جزء منه بس: الإرسال وقف عند انقطاع' } },
-          { id: 'all', label: { en: 'Yes, all of it: every chunk was acknowledged', ar: 'آه، كله: كل قطعة وصل تأكيدها' } },
+          { id: 'none', label: { en: 'No: it was deleted before it was sent', ar: 'لا: حُذف قبل أن يُرسل' } },
+          { id: 'part', label: { en: 'Only part of it: the send stopped at a timeout', ar: 'جزء منه فقط: توقف الإرسال عند انقطاع' } },
+          { id: 'all', label: { en: 'Yes, all of it: every chunk was acknowledged', ar: 'نعم، كله: وصل تأكيد كل قطعة' } },
         ],
       },
-      wrong: { en: 'A timeout in the middle is not the end of the story. Read the log to its last line.', ar: 'الانقطاع بالنص مش آخر القصة. اقرأ السجل لآخر سطر.' },
+      wrong: { en: 'A timeout in the middle is not the end of the story. Read the log to its last line.', ar: 'الانقطاع في الوسط ليس نهاية القصة. اقرأ السجل حتى السطر الأخير.' },
       grants: [
         {
           id: 'ev.l22.sent',
-          title: { en: "Mei Chen's mailbox left Helix", ar: 'صندوق بريد مي تشين طلع من Helix' },
+          title: { en: "Mei Chen's mailbox left Helix", ar: 'صندوق بريد مي تشين خرج من Helix' },
           type: 'artifact',
           content: `${ACT5.chunks}/${ACT5.chunks} chunks acked via ${ACT5.exfilVia}, Mar 13 08:44-08:55 UTC (from ${ACT5.wsIp})`,
           links: ['ev.l21.mailbox', 'ev.l18.exfil'],
@@ -121,56 +145,73 @@ const level: LevelConfig = {
     },
     {
       id: 'rm',
-      prompt: { en: 'The Trash saved this evidence. What happens when someone uses a real rm instead?', ar: 'السلة حفظت هالدليل. شو بيصير لما حدا يستخدم rm حقيقي؟' },
+      prompt: { en: 'The Trash saved this evidence. What happens when someone uses a real `rm` instead?', ar: 'سلة المحذوفات حفظت هذا الدليل. ماذا يحدث عند استخدام الأمر `rm` الحقيقي؟' },
       validator: {
         kind: 'choice',
         correct: 'blocks',
         options: [
-          { id: 'gone', label: { en: 'The data is wiped from the disk the moment rm runs', ar: 'البيانات بتنمسح من القرص لحظة ما يشتغل rm' } },
-          { id: 'blocks', label: { en: 'rm removes the name; the data stays on the disk until new data overwrites it, so image the disk early', ar: 'rm بيشيل الاسم؛ البيانات بتضل على القرص لحد ما بيانات جديدة تكتب فوقها، فلازم تاخذ نسخة من القرص بدري' } },
-          { id: 'empty', label: { en: 'Emptying the Trash securely overwrites the files', ar: 'تفريغ السلة بيكتب فوق الملفات بشكل آمن' } },
+          { id: 'gone', label: { en: 'The data is wiped from the disk the moment rm runs', ar: 'تُمحى البيانات من القرص لحظة تنفيذ الأمر' } },
+          { id: 'blocks', label: { en: 'rm removes the name; the data stays on the disk until new data overwrites it, so image the disk early', ar: 'يُحذف الاسم فقط، وتبقى البيانات على القرص إلى أن تُكتب فوقها بيانات جديدة، ولذلك يجب نسخ القرص مبكراً' } },
+          { id: 'empty', label: { en: 'Emptying the Trash securely overwrites the files', ar: 'تفريغ السلة يكتب فوق الملفات بطريقة آمنة' } },
         ],
       },
-      wrong: { en: 'Think of a library: rm tears out the catalogue card. Is the book still on the shelf?', ar: 'تخيّل مكتبة: rm بيقطع بطاقة الفهرس. الكتاب لسا على الرف؟' },
+      wrong: { en: 'Think of a library: rm tears out the catalogue card. Is the book still on the shelf?', ar: 'تخيّل مكتبة: الأمر `rm` يمزّق بطاقة الفهرس. هل ما زال الكتاب على الرف؟' },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: `ls -a ${HOME}, then cat .bashrc: its last line loads another hidden file.`, ar: `‏ls -a ${HOME}، وبعدين cat .bashrc: آخر سطر فيه بيحمّل ملف مخفي ثاني.` }, cost: 15 },
-    {
-      tier: 'direction',
-      text: {
-        en: 'trash-put follows the freedesktop Trash: ~/.local/share/Trash/files holds the files and ~/.local/share/Trash/info holds NAME.trashinfo with Path= and DeletionDate= (local time).',
-        ar: 'trash-put بيمشي على نظام سلة freedesktop: ‏~/.local/share/Trash/files فيه الملفات، و ~/.local/share/Trash/info فيه NAME.trashinfo مع Path= و DeletionDate= (بالوقت المحلي).',
-      },
-      cost: 30,
+  guide: {
+    nudge: {
+      en: 'Run `ls -a`, then `cat .bashrc`: its last line loads another hidden file.',
+      ar: 'شغّل `ls -a` ثم `cat .bashrc`: السطر الأخير فيه يحمّل ملفاً مخفياً آخر.',
     },
-    {
-      tier: 'near-solution',
-      text: {
-        en: `From Samir's home in the image: cat .local/share/Trash/info/${ACT5.sendLog}.trashinfo: Path=${ACT5.stash}/${ACT5.sendLog}, DeletionDate 10:58:31 local = 08:58 UTC. The log's last line says ${ACT5.chunks}/${ACT5.chunks} acked.`,
-        ar: `بالنسخة: cat ‏.local/share/Trash/info/${ACT5.sendLog}.trashinfo: ‏Path=${ACT5.stash}/${ACT5.sendLog}، و DeletionDate الساعة 10:58:31 محلي = 08:58 UTC. وآخر سطر بالسجل بيقول ${ACT5.chunks}/${ACT5.chunks} وصل تأكيدها.`,
-      },
-      cost: 45,
+    clue: {
+      en: '`trash-put` follows the desktop Trash rules: `.local/share/Trash/files` holds the files, and `.local/share/Trash/info` holds a `.trashinfo` note with `Path=` and `DeletionDate=` (local time).',
+      ar: 'الأمر `trash-put` يتبع نظام سلة المحذوفات في سطح المكتب: المجلد `.local/share/Trash/files` فيه الملفات، والمجلد `.local/share/Trash/info` فيه ورقة `.trashinfo` تحتوي على `Path=` و`DeletionDate=` (بالتوقيت المحلي).',
     },
-  ],
+    steps: {
+      alias: {
+        en: "Run `ls -a`, then `cat .bash_aliases`. It contains `alias rm='trash-put'`: here `rm` moves files to the Trash. Type `trash-put`.",
+        ar: "شغّل `ls -a` ثم `cat .bash_aliases`. فيه السطر `alias rm='trash-put'`: أي أن `rm` هنا ينقل الملفات إلى سلة المحذوفات. اكتب `trash-put`.",
+      },
+      origin: {
+        en: 'Run `cat .local/share/Trash/info/send.log.trashinfo`. The `Path=` line is where the file lived: `/var/tmp/.fontconfig-cache/send.log`.',
+        ar: 'شغّل `cat .local/share/Trash/info/send.log.trashinfo`. سطر `Path=` هو المكان الذي كان فيه الملف: `/var/tmp/.fontconfig-cache/send.log`.',
+      },
+      when: {
+        en: 'The same note says `DeletionDate=2026-03-13T10:58:31`, in local time. `README-image.txt` says local time is UTC+0200, so subtract 2 hours. Type `08:58`.',
+        ar: 'الورقة نفسها فيها `DeletionDate=2026-03-13T10:58:31` بالتوقيت المحلي. والملف `README-image.txt` يذكر أن التوقيت المحلي هو `UTC+0200`، فاطرح ساعتين. اكتب `08:58`.',
+      },
+      sent: {
+        en: 'Run `cat .local/share/Trash/files/send.log` and read to the last line: `done 2101/2101 acked (0 lost)`. The timeout in the middle was followed by a retry. Choose "Yes, all of it".',
+        ar: 'شغّل `cat .local/share/Trash/files/send.log` واقرأ حتى السطر الأخير: `done 2101/2101 acked (0 lost)`. الانقطاع الذي في الوسط تبعته إعادة محاولة. اختر «نعم، كله».',
+      },
+      rm: {
+        en: 'Choose "rm removes the name; the data stays on the disk until new data overwrites it, so image the disk early".',
+        ar: 'اختر الجواب الذي يقول إن `rm` يحذف الاسم فقط، وإن البيانات تبقى على القرص إلى أن تُكتب فوقها بيانات جديدة.',
+      },
+    },
+    concept: {
+      en: 'Deleting is often only moving: the Trash keeps the file and a note about where it came from and when. Even a real delete removes only the name, and the data stays until something overwrites it. That is why investigators copy a disk early and check the Trash first.',
+      ar: 'الحذف في أحيان كثيرة مجرد نقل: سلة المحذوفات تحفظ الملف ومعه ورقة تذكر من أين جاء ومتى. وحتى الحذف الحقيقي يزيل الاسم فقط، وتبقى البيانات إلى أن يُكتب فوقها. لذلك ينسخ المحققون القرص مبكراً ويفحصون سلة المحذوفات أولاً.',
+    },
+  },
   rewards: { points: 160 },
   debrief: {
     concept: {
       en: 'Deleting is often just moving. Desktop Linux follows the freedesktop Trash: the file goes to ~/.local/share/Trash/files and a small .trashinfo note in info/ records where it came from (Path=, spaces written as %20) and when (DeletionDate=, local time with no zone, so you must know the machine\'s offset). Windows does the same in C:\\$Recycle.Bin, where each $I file holds the original path and the deletion time, and macOS uses ~/.Trash. Even a real rm only removes the name: the data stays on the disk until something overwrites it, which is why responders image a disk early and carving tools can still recover files. Here a sysadmin\'s safety alias turned gh0st\'s clean-up (MITRE T1070.004) into evidence: proof that Mei Chen\'s mailbox fully left the company.',
-      ar: 'الحذف كثير مرات مجرد نقل. لينكس بسطح المكتب بيمشي على نظام سلة freedesktop: الملف بيروح على ~/.local/share/Trash/files، وورقة صغيرة .trashinfo بمجلد info/ بتسجّل من وين إجا (Path=، والمسافات بتنكتب %20) وإيمتى (DeletionDate=، بالوقت المحلي وبدون منطقة زمنية، فلازم تعرف فرق توقيت الجهاز). ويندوز بيعمل نفس الإشي بـ C:\\$Recycle.Bin، وكل ملف $I فيه المسار الأصلي ووقت الحذف، وماك بيستخدم ~/.Trash. وحتى rm الحقيقي بيشيل الاسم بس: البيانات بتضل على القرص لحد ما إشي يكتب فوقها، عشان هيك فريق الاستجابة بياخذ نسخة من القرص بدري، وأدوات الاستخراج (carving) بتقدر ترجّع ملفات. هون اختصار أمان عمله مدير نظام قلب تنظيف gh0st لآثاره (MITRE T1070.004) لدليل: إثبات إن صندوق بريد مي تشين طلع كامل من الشركة.',
+      ar: 'الحذف في أحيان كثيرة مجرد نقل. لينكس بواجهة سطح المكتب يتبع نظام سلة محذوفات موحّداً: الملف ينتقل إلى `~/.local/share/Trash/files`، وورقة صغيرة `.trashinfo` في المجلد `info/` تسجّل من أين جاء (`Path=`، والمسافات تُكتب `%20`) ومتى (`DeletionDate=`، بالتوقيت المحلي ودون منطقة زمنية، فيجب أن تعرف فرق توقيت الجهاز). ويندوز يفعل الشيء نفسه في `C:\\$Recycle.Bin`، وماك يستخدم `~/.Trash`. وحتى الأمر `rm` الحقيقي يحذف الاسم فقط: البيانات تبقى على القرص إلى أن يُكتب فوقها، ولذلك ينسخ فريق الاستجابة القرص مبكراً، وتستطيع أدوات الاستخراج استعادة ملفات. هنا حوّل اختصار أمان وضعه مدير النظام محاولة gh0st لمحو آثاره (MITRE T1070.004) إلى دليل: إثبات أن صندوق بريد مي تشين خرج كاملاً من الشركة.',
     },
     realTools: ['trash-cli (trash-list, trash-restore)', 'Autopsy / The Sleuth Kit', 'PhotoRec', 'extundelete', 'RBCmd ($Recycle.Bin $I parser)'],
     takeaway: {
       en: 'Before you call something gone, check the Trash, the Recycle Bin and the unallocated space. And write down the clock zone of every date you read.',
-      ar: 'قبل ما تقول إشي راح، افحص السلة وسلة المحذوفات والمساحة الفاضية بالقرص. واكتب المنطقة الزمنية لكل تاريخ بتقرأه.',
+      ar: 'قبل أن تقول إن شيئاً اختفى، افحص سلة المحذوفات والمساحة غير المستخدمة في القرص. واكتب المنطقة الزمنية لكل تاريخ تقرؤه.',
     },
     source: 'freedesktop.org Trash Specification 1.0; MITRE ATT&CK T1070.004 (File Deletion); NIST SP 800-86 (Integrating Forensic Techniques into Incident Response)',
   },
   echo: {
-    intro: { en: 'Deleted files leave footprints. Samir may have left us a safety net.', ar: 'الملفات المحذوفة بتترك آثار. يمكن سمير ترك لنا شبكة أمان.' },
+    intro: { en: 'Deleted files leave footprints. Samir may have left us a safety net.', ar: 'الملفات المحذوفة تترك آثاراً. وربما ترك لنا سمير شبكة أمان.' },
     success: {
       en: 'The whole mailbox got out, and the photo they worked from is still in the bin. Next: what does that photo say about who took it?',
-      ar: 'الصندوق كله طلع، والصورة اللي اشتغلوا منها لسا بالسلة. الجاي: شو بتحكي هالصورة عن اللي صوّرها؟',
+      ar: 'صندوق البريد خرج كله، والصورة التي اعتمدوا عليها ما زالت في السلة. التالي: ماذا تقول هذه الصورة عمّن التقطها؟',
     },
   },
   solution: `ls -a ~s.haddad -> .bash_aliases: alias rm='trash-put'. Trash/info/send.log.trashinfo: Path=${ACT5.stash}/send.log, DeletionDate=${LOCAL_DELETED} (local +0200) = 08:58 UTC. Trash/files/send.log: 2101/2101 acked -> all. Choice: blocks.`,

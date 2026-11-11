@@ -33,7 +33,31 @@ const level: LevelConfig = {
   requires: { levels: ['L03'], evidence: ['ev.l02.ip'] },
   briefing: {
     en: 'You know the attacker IP. Now find every trace of it in the server logs. Thousands of lines, one pattern: grep is how analysts search text at scale. Be precise: a sloppy pattern gives a wrong answer that looks right.',
-    ar: 'صرت تعرف الـ IP تبع المهاجم. هلأ لاقي كل أثر إله بسجلات السيرفر. آلاف الأسطر ونمط واحد: grep هو أداة المحلل للبحث بالنصوص على نطاق واسع. خليك دقيق: النمط المهمل بيعطي جواب غلط شكله صح.',
+    ar: 'أصبحت تعرف عنوان IP الخاص بالمهاجم. اعثر الآن على كل أثر له في سجلات الخادم. آلاف الأسطر ونمط واحد: الأمر `grep` هو أداة المحلل للبحث في النصوص الكبيرة. كن دقيقاً: النمط غير الدقيق يعطي جواباً خاطئاً يبدو صحيحاً.',
+  },
+  mission: {
+    goal: {
+      en: "Search the server logs for the attacker's IP and measure what it did: how many logins failed and which accounts it got into.",
+      ar: 'ابحث في سجلات الخادم عن عنوان IP الخاص بالمهاجم، واعرف ما فعله: كم محاولة دخول فشلت، وأي الحسابات دخلها.',
+    },
+    investigate: [
+      {
+        en: 'All logs under `/var/log`, searched with `grep`.',
+        ar: 'كل السجلات داخل `/var/log`، بالبحث فيها بالأمر `grep`.',
+      },
+      {
+        en: 'The file `auth.log`: lines with `Failed password` are failed logins, lines with `Accepted password` are successful ones.',
+        ar: 'الملف `auth.log`: الأسطر التي فيها `Failed password` محاولات فاشلة، والتي فيها `Accepted password` دخول ناجح.',
+      },
+      {
+        en: 'A second address, `203.0.113.7`, looks almost the same. It is a harmless scanner and must not be counted.',
+        ar: 'عنوان آخر هو `203.0.113.7` يشبه عنوان المهاجم كثيراً. إنه ماسح غير مؤذٍ من الإنترنت، ولا يجوز أن يدخل في العدّ.',
+      },
+    ],
+    success: {
+      en: 'You have the right log file, the exact number of failed logins from the attacker, and the second account he entered.',
+      ar: 'تكون قد حدّدت ملف السجل الصحيح، والعدد الدقيق لمحاولات المهاجم الفاشلة، والحساب الثاني الذي دخله.',
+    },
   },
   apps: ['case', 'terminal', 'files', 'evidence'],
   autoOpen: ['case', 'terminal'],
@@ -65,14 +89,14 @@ const level: LevelConfig = {
     {
       id: 'search',
       prompt: {
-        en: 'Search ALL logs under /var/log, recursively, for the attacker IP.',
-        ar: 'ابحث بكل السجلات تحت /var/log (بشكل متكرر) عن IP المهاجم.',
+        en: "In the terminal, search ALL logs under `/var/log` (and its subfolders) for the attacker's IP.",
+        ar: 'في الطرفية، ابحث عن عنوان IP الخاص بالمهاجم في كل السجلات داخل `/var/log` ومجلداته الفرعية.',
       },
       validator: { kind: 'command', pattern: '^grep\\b.*203[.\\\\\\[\\]]*0[.\\\\\\[\\]]*113[.\\\\\\[\\]]*77' },
     },
     {
       id: 'file',
-      prompt: { en: 'Which log file records the attacker’s SSH login attempts?', ar: 'أي ملف سجل بيسجّل محاولات دخول المهاجم بـ SSH؟' },
+      prompt: { en: 'Which log file records the attacker’s SSH login attempts?', ar: 'أي ملف سجل يسجّل محاولات دخول المهاجم عبر SSH؟' },
       placeholder: '/var/log/…',
       validator: { kind: 'answer', accept: ['/var/log/auth.log', 'auth.log'] },
     },
@@ -80,19 +104,19 @@ const level: LevelConfig = {
       id: 'failures',
       prompt: {
         en: 'How many FAILED logins came from exactly the attacker’s IP?',
-        ar: 'كم محاولة دخول فاشلة إجت من IP المهاجم بالضبط؟',
+        ar: 'كم محاولة دخول فاشلة جاءت من عنوان المهاجم بالتحديد؟',
       },
       placeholder: 'number',
       validator: { kind: 'answer', accept: [String(FAILED_FROM_ATTACKER)] },
       derived: 'grep "Failed password" /var/log/auth.log | grep -wc 203.0.113.77',
       wrong: {
         en: 'Check your pattern: in grep, "." matches ANY character, and 203.0.113.7 (a scanner) is a prefix of the attacker IP. Match the whole address only (try -w).',
-        ar: 'افحص النمط: بـ grep النقطة "." بتطابق أي حرف، و 203.0.113.7 (ماسح من الإنترنت) جزء من بداية IP المهاجم. طابق العنوان كامل بس (جرّب -w).',
+        ar: 'راجع النمط: في `grep` النقطة تطابق أي حرف، والعنوان `203.0.113.7` (ماسح من الإنترنت) يطابق بداية عنوان المهاجم. طابق العنوان كاملاً فقط (جرّب الخيار `-w`).',
       },
       grants: [
         {
           id: 'ev.l04.spray',
-          title: { en: 'Password spraying', ar: 'رشّ كلمات المرور' },
+          title: { en: 'Password spraying', ar: 'تجربة كلمات مرور على حسابات كثيرة' },
           type: 'note',
           content: `${FAILED_FROM_ATTACKER} failed SSH logins over 5 accounts in ~30 min from ${ACT1.attackerIp}`,
           links: ['ev.l02.ip'],
@@ -103,10 +127,10 @@ const level: LevelConfig = {
       id: 'account',
       prompt: {
         en: 'Besides Samir, which account did the attacker log into SUCCESSFULLY?',
-        ar: 'غير حساب سمير، أي حساب نجح المهاجم يدخل عليه؟',
+        ar: 'غير حساب سمير، ما الحساب الآخر الذي نجح المهاجم في الدخول إليه؟',
       },
       validator: { kind: 'answer', accept: [ACT1.secondAccount] },
-      wrong: { en: 'Successful SSH logins say "Accepted password".', ar: 'الدخول الناجح بـ SSH مكتوب فيه "Accepted password".' },
+      wrong: { en: 'Successful SSH logins say "Accepted password".', ar: 'الدخول الناجح عبر SSH يظهر في السجل بعبارة `Accepted password`.' },
       grants: [
         {
           id: 'ev.l04.account',
@@ -118,54 +142,63 @@ const level: LevelConfig = {
       ],
     },
   ],
-  hints: [
-    {
-      tier: 'nudge',
-      text: { en: '`grep -r PATTERN DIR` searches every file under DIR. `man grep` lists the useful flags.', ar: '`grep -r PATTERN DIR` بيدوّر بكل الملفات تحت المجلد. `man grep` فيه الخيارات المفيدة.' },
-      cost: 10,
+  guide: {
+    nudge: {
+      en: '`grep -r PATTERN DIR` searches every file under DIR. `man grep` lists the useful flags.',
+      ar: 'الأمر `grep -r PATTERN DIR` يبحث في كل الملفات داخل المجلد. والأمر `man grep` يشرح الخيارات المفيدة.',
     },
-    {
-      tier: 'direction',
-      text: {
-        en: 'Chain tools with "|": `grep "Failed password" auth.log | grep -w 203.0.113.77 | wc -l`. The -w flag stops 203.0.113.7 from matching too.',
-        ar: 'اربط الأدوات بـ "|": `grep "Failed password" auth.log | grep -w 203.0.113.77 | wc -l`. خيار -w بيمنع 203.0.113.7 إنه يتطابق كمان.',
+    clue: {
+      en: 'Chain tools with `|`: `grep "Failed password" auth.log | grep -w 203.0.113.77 | wc -l`. The `-w` flag stops `203.0.113.7` from matching too.',
+      ar: 'اربط الأدوات بالرمز `|` هكذا: `grep "Failed password" auth.log | grep -w 203.0.113.77 | wc -l`. الخيار `-w` يمنع مطابقة العنوان `203.0.113.7` أيضاً.',
+    },
+    steps: {
+      search: {
+        en: 'Type `grep -r 203.0.113.77 /var/log`. The `-r` option searches every file under that folder.',
+        ar: 'اكتب `grep -r 203.0.113.77 /var/log`. الخيار `-r` يبحث في كل الملفات داخل المجلد.',
       },
-      cost: 20,
-    },
-    {
-      tier: 'near-solution',
-      text: {
-        en: 'Run `grep Accepted /var/log/auth.log | grep -w 203.0.113.77` — two lines: one is Samir, the other is your answer.',
-        ar: 'شغّل `grep Accepted /var/log/auth.log | grep -w 203.0.113.77`؛ سطرين: واحد لسمير، والثاني هو جوابك.',
+      file: {
+        en: 'Each result starts with the name of its file. The SSH lines (`Failed password` and `Accepted password`) are in `/var/log/auth.log`.',
+        ar: 'كل نتيجة تبدأ باسم الملف الذي جاءت منه. أسطر SSH (`Failed password` و`Accepted password`) موجودة في `/var/log/auth.log`.',
       },
-      cost: 35,
+      failures: {
+        en: 'Count only the exact address: `grep "Failed password" /var/log/auth.log | grep -wc 203.0.113.77`. Without `-w` the scanner `203.0.113.7` is counted too. The answer is 23.',
+        ar: 'عُدَّ العنوان المطابق تماماً فقط: `grep "Failed password" /var/log/auth.log | grep -wc 203.0.113.77`. دون الخيار `-w` يدخل الماسح `203.0.113.7` في العدّ أيضاً. الجواب 23.',
+      },
+      account: {
+        en: 'Run `grep Accepted /var/log/auth.log | grep -w 203.0.113.77`. Two lines appear. One is `s.haddad`. The other one is the answer: `j.ortiz`.',
+        ar: 'شغّل `grep Accepted /var/log/auth.log | grep -w 203.0.113.77`. يظهر سطران: أحدهما للحساب `s.haddad`، والآخر هو الجواب: `j.ortiz`.',
+      },
     },
-  ],
+    concept: {
+      en: '`grep` shows every line that matches a pattern, so one loose character gives a wrong count that still looks right. Many failed logins on many accounts from one address, then a success, is called password spraying. Always check a few results with your own eyes.',
+      ar: 'الأمر `grep` يعرض كل سطر يطابق النمط، ولذلك حرف واحد غير دقيق يعطي عدداً خاطئاً يبدو صحيحاً. محاولات فاشلة كثيرة على حسابات كثيرة من عنوان واحد، يتبعها دخول ناجح: هذا هجوم تجربة كلمات المرور. وتحقق دائماً بعينك من بعض النتائج.',
+    },
+  },
   rewards: { points: 100 },
   debrief: {
     concept: {
       en: 'grep searches text with regular expressions. In a regex "." means "any character", so 203.0.113.7 also matches 203.0.113.77 and 203x0x113x7. Use -w (whole word), -F (fixed string) or escape dots (203\\.0\\.113\\.77). Many failures across many accounts from one source, then a success, is the signature of password spraying.',
-      ar: 'grep بيدوّر بالنصوص باستخدام التعابير النمطية. بالـ regex النقطة "." معناها "أي حرف"، فـ 203.0.113.7 بيطابق كمان 203.0.113.77. استخدم -w (كلمة كاملة) أو -F (نص ثابت) أو هرّب النقاط (203\\.0\\.113\\.77). فشل كثير على حسابات كثيرة من مصدر واحد وبعده نجاح، هاد توقيع رشّ كلمات المرور.',
+      ar: 'الأمر `grep` يبحث في النصوص باستخدام التعابير النمطية (regex). في هذه التعابير النقطة تعني «أي حرف»، فالنمط `203.0.113.7` يطابق أيضاً `203.0.113.77`. استخدم `-w` (كلمة كاملة) أو `-F` (نص ثابت)، أو ضع `\\` قبل كل نقطة. محاولات فاشلة كثيرة على حسابات كثيرة من مصدر واحد، ثم دخول ناجح: هذه علامة هجوم تجربة كلمات المرور (password spraying).',
     },
     realTools: ['grep', 'ripgrep (rg)', 'awk', 'Splunk', 'Elastic / Kibana'],
     takeaway: {
       en: 'Always ask “is my pattern matching only what I think it matches?” — then verify by eyeballing a few results.',
-      ar: 'اسأل حالك دايماً: "هل النمط تبعي بيطابق بس اللي بفكّر فيه؟" وبعدين تأكّد بعينك من كم نتيجة.',
+      ar: 'اسأل نفسك دائماً: هل يطابق النمط ما أقصده فقط؟ ثم تحقق بعينك من بعض النتائج.',
     },
     source: 'MITRE ATT&CK T1110.003 (Password Spraying); GNU grep manual',
   },
   echo: {
     intro: {
       en: 'Logs never forget. But they are noisy: another IP that looks almost identical is in there too. Precision matters.',
-      ar: 'السجلات ما بتنسى، بس فيها ضجيج كثير: في IP ثاني شبه مطابق موجود كمان. الدقة مهمة.',
+      ar: 'السجلات لا تنسى، لكنها مليئة بالضجيج: فيها عنوان آخر شبه مطابق لعنوان المهاجم. الدقة مهمة.',
     },
     success: {
       en: 'Spraying, then two accounts. This was not luck. Someone planned it.',
-      ar: 'رشّ، وبعدين حسابين. هاد مش حظ. في حدا مخطّط إله.',
+      ar: 'تجربة كلمات مرور، ثم حسابان. هذا ليس حظاً. هناك من خطّط له.',
     },
   },
   ghost: {
-    taunt: { en: 'Counting my footsteps? Cute. You are still three moves behind.', ar: 'عم تعدّ خطواتي؟ لطيف. لسا إنت متأخر بثلاث خطوات.' },
+    taunt: { en: 'Counting my footsteps? Cute. You are still three moves behind.', ar: 'تعدّ خطواتي؟ لطيف. ما زلت متأخراً عني بثلاث خطوات.' },
   },
   solution: 'grep -r 203.0.113.77 /var/log ; grep "Failed password" /var/log/auth.log | grep -wc 203.0.113.77 -> 23 ; grep Accepted /var/log/auth.log | grep -w 203.0.113.77 -> s.haddad, j.ortiz',
   selfTest: [

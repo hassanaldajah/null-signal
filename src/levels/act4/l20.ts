@@ -48,7 +48,31 @@ const level: LevelConfig = {
   },
   briefing: {
     en: `BOSS. Nine sources, nine clocks. ${EVENTS} holds one key line from each step of the night, copied exactly as each system wrote it, plus one line that does not belong. Some write UTC, some local time, one counts seconds since 1970. Convert everything to UTC, throw out the stranger, and rebuild the night in order.`,
-    ar: `زعيم الفصل. تسع مصادر وتسع ساعات. ملف ${EVENTS} فيه سطر مهم من كل خطوة بالليلة، منسوخ متل ما كتبه كل نظام بالزبط، ومعهم سطر واحد مش من القصة. في مصادر بتكتب UTC، وفي بتكتب الوقت المحلي، ووحد بيعدّ ثواني من سنة 1970. حوّل كل إشي لـ UTC، وطلّع الغريب، وابني الليلة بالترتيب.`,
+    ar: 'تحدّي الفصل. تسعة مصادر وتسع ساعات. الملف `/cases/helix-0313/events.txt` فيه سطر مهم من كل خطوة في تلك الليلة، منسوخ كما كتبه كل نظام تماماً، ومعها سطر واحد لا ينتمي إلى القصة. بعض المصادر يكتب بتوقيت UTC، وبعضها بالتوقيت المحلي، وواحد يعدّ الثواني منذ عام 1970. حوّل كل الأوقات إلى UTC، واستبعد السطر الغريب، وأعد بناء أحداث الليلة بالترتيب.',
+  },
+  mission: {
+    goal: {
+      en: 'Put the key events of the night in true time order by converting every time to UTC.',
+      ar: 'رتّب أهم أحداث تلك الليلة حسب وقتها الحقيقي، بتحويل كل الأوقات إلى توقيت UTC.',
+    },
+    investigate: [
+      {
+        en: 'The file `README-time.txt`: how each source writes time, and how to convert it.',
+        ar: 'الملف `README-time.txt`: كيف يكتب كل مصدر الوقت، وكيف تحوّله.',
+      },
+      {
+        en: 'The file `events.txt`: nine lines, labelled A to I, each copied from a different source.',
+        ar: 'الملف `events.txt`: تسعة أسطر مرقّمة بالأحرف من A إلى I، وكل سطر منسوخ من مصدر مختلف.',
+      },
+      {
+        en: 'Three kinds of time: local time with an offset such as `+0200`, Unix time such as `#1773373752`, and times that are already UTC.',
+        ar: 'ثلاثة أنواع من الأوقات: توقيت محلي مع فرق مثل `+0200`، وتوقيت يونكس مثل `#1773373752`، وأوقات مكتوبة بتوقيت UTC أصلاً.',
+      },
+    ],
+    success: {
+      en: 'You have converted A and G to UTC, removed the event that does not belong, ordered the other eight, and measured how fast the attacker worked. The timeline is pinned to your board.',
+      ar: 'تكون قد حوّلت الحدثين A و G إلى UTC، واستبعدت الحدث الغريب، ورتّبت الأحداث الثمانية الباقية، وحسبت سرعة عمل المهاجم. يُثبَّت الخط الزمني على لوحة الأدلة.',
+    },
   },
   apps: ['case', 'terminal', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -80,50 +104,50 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'vpn',
-      prompt: { en: 'Event A was exported in local time (+0200). What time was it in UTC? (HH:MM)', ar: 'الحدث A انصدّر بالوقت المحلي (+0200). قديش كانت الساعة بـ UTC؟ (HH:MM)' },
+      prompt: { en: 'Event A was exported in local time (`+0200`). What time was it in UTC? (HH:MM)', ar: 'الحدث A مكتوب بالتوقيت المحلي (`+0200`). كم كانت الساعة بتوقيت UTC؟ (بصيغة HH:MM)' },
       placeholder: 'HH:MM',
       validator: { kind: 'answer', accept: ['03:12', '03:12:41'] },
-      wrong: { en: 'UTC = local time minus the offset. +0200 means local time is 2 hours ahead of UTC.', ar: 'UTC = الوقت المحلي ناقص الفرق. +0200 معناها الوقت المحلي قدّام UTC بساعتين.' },
+      wrong: { en: 'UTC = local time minus the offset. `+0200` means local time is 2 hours ahead of UTC.', ar: 'توقيت UTC يساوي التوقيت المحلي ناقص الفرق. القيمة `+0200` تعني أن التوقيت المحلي متقدّم عن UTC بساعتين.' },
     },
     {
       id: 'portal',
-      prompt: { en: 'Event G is written in -0500. When was it in UTC? (YYYY-MM-DD HH:MM)', ar: 'الحدث G مكتوب بـ -0500. إمتى كان بـ UTC؟ (YYYY-MM-DD HH:MM)' },
+      prompt: { en: 'Event G is written with the offset `-0500`. When was it in UTC? (YYYY-MM-DD HH:MM)', ar: 'الحدث G مكتوب بالفرق `-0500`. متى حدث بتوقيت UTC؟ (بصيغة YYYY-MM-DD HH:MM)' },
       placeholder: 'YYYY-MM-DD HH:MM',
       validator: { kind: 'answer', accept: ['2026-03-13 03:20', '2026-03-13 03:20:44', '2026-03-13T03:20:44Z'] },
       derived: '22:20:44 -0500 plus 5 hours = 03:20:44 UTC on the next day (Mar 13); matches the portal audit in L15.',
-      wrong: { en: 'Minus a negative offset means adding: 22:20 + 5 hours. The hours pass midnight, so the date changes too.', ar: 'ناقص فرق سالب يعني زائد: 22:20 + 5 ساعات. الساعات بتعدّي نص الليل، فالتاريخ كمان بيتغيّر.' },
+      wrong: { en: 'Minus a negative offset means adding: 22:20 + 5 hours. The hours pass midnight, so the date changes too.', ar: 'طرح فرق سالب يعني الجمع: 22:20 زائد 5 ساعات. الساعات تتجاوز منتصف الليل، فيتغيّر التاريخ أيضاً.' },
     },
     {
       id: 'stranger',
-      prompt: { en: 'One event is not part of this intrusion. Which one?', ar: 'في حدث واحد مش جزء من هالاختراق. أي واحد؟' },
+      prompt: { en: 'One event is not part of this intrusion. Which one?', ar: 'حدث واحد ليس جزءاً من هذا الاختراق. ما هو؟' },
       validator: {
         kind: 'choice',
         correct: 'I',
         options: [
-          { id: 'G', label: { en: "[G] It happened on another company's system", ar: '[G] صار على نظام شركة ثانية' } },
-          { id: 'I', label: { en: `[I] A different IP (${ACT3.bruteIp}) that never got in: internet noise`, ar: `[I] IP مختلف (${ACT3.bruteIp}) وما قدر يدخل أبداً: ضجيج من الإنترنت` } },
-          { id: 'B', label: { en: '[B] It happened on a different server', ar: '[B] صار على سيرفر مختلف' } },
+          { id: 'G', label: { en: "[G] It happened on another company's system", ar: 'الحدث G: وقع على نظام شركة أخرى' } },
+          { id: 'I', label: { en: `[I] A different IP (${ACT3.bruteIp}) that never got in: internet noise`, ar: 'الحدث I: عنوان مختلف (192.0.2.44) لم يدخل أبداً، وهو ضجيج من الإنترنت' } },
+          { id: 'B', label: { en: '[B] It happened on a different server', ar: 'الحدث B: وقع على خادم مختلف' } },
         ],
       },
       wrong: {
         en: `What ties an event to this intrusion is the actor, not the machine. Which line never touches ${ACT4.attackerIp}, the phishing site or the stolen accounts?`,
-        ar: `اللي بيربط الحدث بهالاختراق هو الفاعل، مش الجهاز. أي سطر ما إله علاقة بـ ${ACT4.attackerIp} ولا بموقع التصيّد ولا بالحسابات المسروقة؟`,
+        ar: 'ما يربط الحدث بهذا الاختراق هو الفاعل لا الجهاز. أي سطر لا علاقة له بالعنوان `203.0.113.77` ولا بموقع التصيّد ولا بالحسابات المسروقة؟',
       },
     },
     {
       id: 'order',
-      prompt: { en: 'Put the other eight in true UTC order, oldest first (8 letters, e.g. ABCDEFGH).', ar: 'رتّب الثمانية الباقيين حسب وقتهم الحقيقي بـ UTC، الأقدم أول (8 أحرف، مثلاً ABCDEFGH).' },
+      prompt: { en: 'Put the other eight in true UTC order, oldest first (8 letters, e.g. ABCDEFGH).', ar: 'رتّب الأحداث الثمانية الباقية حسب وقتها الحقيقي بتوقيت UTC، من الأقدم إلى الأحدث (8 أحرف، مثل ABCDEFGH).' },
       placeholder: 'ABCDEFGH',
       validator: { kind: 'answer', accept: [ORDER, ORDER.split('').join(' '), ORDER.split('').join(','), ORDER.split('').join(', '), ORDER.split('').join('-')] },
       derived: 'UTC: C 22:31:05, E 22:47:31 (Mar 12); A 03:12:41, G 03:20:44, F 03:45:10, D 03:49:12, H 03:50:05, B 04:03:30 (Mar 13).',
       wrong: {
         en: 'Write every time in UTC with its date first, then sort. Sorting by the clock as printed moves two events to the wrong place.',
-        ar: 'اكتب كل وقت بـ UTC مع تاريخه أول، وبعدين رتّب. الترتيب حسب الساعة متل ما هي مطبوعة بيحط حدثين بالمكان الغلط.',
+        ar: 'اكتب أولاً كل وقت بتوقيت UTC مع تاريخه، ثم رتّب. الترتيب حسب الساعة كما هي مكتوبة يضع حدثين في غير مكانهما.',
       },
       grants: [
         {
           id: 'ev.l20.timeline',
-          title: { en: 'The night of Mar 12-13, in UTC', ar: 'ليلة 12-13 آذار، بتوقيت UTC' },
+          title: { en: 'The night of Mar 12-13, in UTC', ar: 'ليلة 12-13 آذار بتوقيت UTC' },
           type: 'timestamp',
           content: '22:31 phish -> 22:47 creds -> 03:12 VPN -> 03:20 vendor portal -> 03:45 db01 -> 03:49 exfil -> 03:50 cron -> 04:03 web leak',
           links: ['ev.l06.origin', 'ev.l10.patient-zero', 'ev.l02.time', 'ev.l15.reuse', 'ev.l16.archive', 'ev.l18.exfil', 'ev.l19.cron', 'ev.l17.leak'],
@@ -132,56 +156,91 @@ const level: LevelConfig = {
     },
     {
       id: 'speed',
-      prompt: { en: 'How many minutes passed between the VPN login (A) and the data leaving (D)?', ar: 'كم دقيقة مرقت بين دخول الـ VPN (A) وطلوع البيانات (D)؟' },
+      prompt: { en: 'How many minutes passed between the VPN login (A) and the data leaving (D)?', ar: 'كم دقيقة مرّت بين الدخول عبر VPN (الحدث A) وخروج البيانات (الحدث D)؟' },
       placeholder: 'minutes',
       validator: { kind: 'answer', accept: ['36', '37', '36 minutes', '37 minutes', '36 min', '37 min'] },
       derived: '03:12:41 to 03:49:12 = 36 min 31 s (36 or 37 accepted).',
-      wrong: { en: 'Use the UTC times you found for A and D, then subtract.', ar: 'استخدم أوقات UTC اللي طلّعتها لـ A و D، واطرح.' },
+      wrong: { en: 'Use the UTC times you found for A and D, then subtract.', ar: 'استخدم وقتَي الحدثين A و D بتوقيت UTC كما حسبتهما، ثم اطرح.' },
     },
     {
       id: 'control',
-      prompt: { en: 'Every step after 03:12 started with one stolen password. Which control would have made that password useless on its own?', ar: 'كل خطوة بعد 03:12 بلّشت بكلمة سر وحدة مسروقة. أي إجراء كان خلّى هالكلمة لحالها بلا فايدة؟' },
+      prompt: { en: 'Every step after 03:12 started with one stolen password. Which control would have made that password useless on its own?', ar: 'كل الخطوات بعد الساعة 03:12 بدأت بكلمة مرور مسروقة واحدة. أي إجراء كان سيجعل هذه الكلمة وحدها بلا فائدة؟' },
       validator: {
         kind: 'choice',
         correct: 'mfa',
         options: [
-          { id: 'curl', label: { en: 'Block curl on every server', ar: 'منع curl على كل السيرفرات' } },
-          { id: 'mfa', label: { en: 'Multi-factor authentication on the VPN and the vendor portal', ar: 'التحقق متعدد العوامل (MFA) على الـ VPN وبوابة المورّد' } },
-          { id: 'cron', label: { en: 'Delete every crontab once a night', ar: 'حذف كل ملفات crontab مرة كل ليلة' } },
+          { id: 'curl', label: { en: 'Block curl on every server', ar: 'منع curl على كل الخوادم' } },
+          { id: 'mfa', label: { en: 'Multi-factor authentication on the VPN and the vendor portal', ar: 'التحقق بخطوتين (MFA) على VPN وعلى بوابة المورّد' } },
+          { id: 'cron', label: { en: 'Delete every crontab once a night', ar: 'حذف كل ملفات المهام المجدولة مرة كل ليلة' } },
         ],
       },
-      wrong: { en: 'Look back at the portal audit: "password ok + no MFA". What would have stopped a password from being enough?', ar: 'ارجع لسجل البوابة: "password ok + no MFA". شو كان بيمنع إنه كلمة السر لحالها تكفي؟' },
+      wrong: { en: 'Look back at the portal audit: "password ok + no MFA". What would have stopped a password from being enough?', ar: 'ارجع إلى سجل البوابة: `password ok + no MFA`. ما الذي كان سيمنع كلمة المرور وحدها من أن تكفي؟' },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: 'cat README-time.txt, then cat events.txt. Write each event as "date time UTC" before you sort anything.', ar: 'cat README-time.txt، وبعدين cat events.txt. اكتب كل حدث على شكل "تاريخ ووقت UTC" قبل ما ترتّب أي إشي.' }, cost: 30 },
-    { tier: 'direction', text: { en: `D is Unix time: date -d @${unixTime(ACT4.pushedAt)}. A is 2 hours ahead of UTC; G is 5 hours behind and crosses midnight.`, ar: `D وقت يونكس: date -d @${unixTime(ACT4.pushedAt)}. و A قدّام UTC بساعتين؛ و G ورا UTC بخمس ساعات وبيعدّي نص الليل.` }, cost: 50 },
-    { tier: 'near-solution', text: { en: 'UTC: A 03:12, G Mar 13 03:20, D 03:49. The stranger is the only line from 192.0.2.44. The night starts with the email on Mar 12.', ar: 'بـ UTC: A الساعة 03:12، و G يوم 13 آذار الساعة 03:20، و D الساعة 03:49. الغريب هو السطر الوحيد من 192.0.2.44. والليلة بتبلّش بالإيميل يوم 12 آذار.' }, cost: 70 },
-  ],
+  guide: {
+    nudge: {
+      en: 'Run `cat README-time.txt`, then `cat events.txt`. Write each event as "date time UTC" before you sort anything.',
+      ar: 'شغّل `cat README-time.txt` ثم `cat events.txt`. اكتب كل حدث بصيغة «التاريخ ثم الوقت بتوقيت UTC» قبل أن ترتّب أي شيء.',
+    },
+    clue: {
+      en: 'Event D is Unix time: `date -d @1773373752`. Event A is 2 hours ahead of UTC. Event G is 5 hours behind UTC and crosses midnight.',
+      ar: 'الحدث D بتوقيت يونكس: `date -d @1773373752`. الحدث A متقدّم عن UTC بساعتين. والحدث G متأخر عن UTC بخمس ساعات ويتجاوز منتصف الليل.',
+    },
+    steps: {
+      vpn: {
+        en: 'Event A says `05:12:41 +0200`. UTC is the local time minus the offset: 05:12 minus 2 hours is 03:12. Type `03:12`.',
+        ar: 'الحدث A فيه `05:12:41 +0200`. توقيت UTC يساوي التوقيت المحلي ناقص الفرق: 05:12 ناقص ساعتين يساوي 03:12. اكتب `03:12`.',
+      },
+      portal: {
+        en: 'Event G says `22:20:44 -0500` on Mar 12. Minus a negative offset means adding: 22:20 plus 5 hours is 03:20 on the next day. Type `2026-03-13 03:20`.',
+        ar: 'الحدث G فيه `22:20:44 -0500` يوم 12 آذار. طرح فرق سالب يعني الجمع: 22:20 زائد 5 ساعات يساوي 03:20 في اليوم التالي. اكتب `2026-03-13 03:20`.',
+      },
+      stranger: {
+        en: 'Eight events involve `203.0.113.77`, the fake domain or the stolen accounts. Event I is a different address, `192.0.2.44`, which never got in. Choose I.',
+        ar: 'ثمانية أحداث تتعلق بالعنوان `203.0.113.77` أو بالنطاق المزيّف أو بالحسابات المسروقة. الحدث I عنوان مختلف هو `192.0.2.44` ولم يدخل أبداً. اختر الحدث I.',
+      },
+      order: {
+        en: 'In UTC: C 22:31 and E 22:47 on Mar 12. Then on Mar 13: A 03:12, G 03:20, F 03:45, D 03:49 (from `date -d @1773373752`), H 03:50 and B 04:03. Type `CEAGFDHB`.',
+        ar: 'بتوقيت UTC: الحدث C الساعة 22:31 والحدث E الساعة 22:47 يوم 12 آذار. ثم يوم 13 آذار: A الساعة 03:12، و G الساعة 03:20، و F الساعة 03:45، و D الساعة 03:49 (من الأمر `date -d @1773373752`)، و H الساعة 03:50، و B الساعة 04:03. اكتب `CEAGFDHB`.',
+      },
+      speed: {
+        en: 'A is 03:12:41 and D is 03:49:12. The difference is about 36 minutes. Type `36`.',
+        ar: 'وقت الحدث A هو 03:12:41 ووقت الحدث D هو 03:49:12. الفرق نحو 36 دقيقة. اكتب `36`.',
+      },
+      control: {
+        en: 'Choose "Multi-factor authentication on the VPN and the vendor portal". Every later step started from one stolen password.',
+        ar: 'اختر «التحقق بخطوتين (MFA) على VPN وعلى بوابة المورّد». كل الخطوات اللاحقة بدأت من كلمة مرور مسروقة واحدة.',
+      },
+    },
+    concept: {
+      en: 'Every system writes time in its own way: UTC, local time with an offset, or seconds since 1970. Convert everything to UTC before you sort, or the story comes out in the wrong order. Keep the original value next to the converted one so others can check your work.',
+      ar: 'كل نظام يكتب الوقت بطريقته: توقيت UTC، أو توقيت محلي مع فرق، أو عدد الثواني منذ عام 1970. حوّل كل الأوقات إلى UTC قبل الترتيب، وإلا خرجت القصة بترتيب خاطئ. واحتفظ بالقيمة الأصلية بجانب القيمة المحوَّلة ليستطيع غيرك مراجعة عملك.',
+    },
+  },
   rewards: { points: 250, achievement: 'act4-clear' },
   debrief: {
     concept: {
       en: 'A timeline turns scattered evidence into one story, and time is the hard part: every source writes it differently (ISO with Z, syslog with no year or zone, Unix epoch, local time with an offset, email Date headers). Normalize everything to UTC before sorting, record each source\'s clock and zone, and keep the raw value next to the converted one so others can check your work. Sorted correctly, the night shows its shape: about five hours from phishing email to data leaving, and only 36 minutes from VPN login to exfiltration.',
-      ar: 'الخط الزمني بيحوّل الأدلة المبعثرة لقصة وحدة، والوقت هو الجزء الصعب: كل مصدر بيكتبه بطريقة (ISO مع Z، و syslog بلا سنة ولا منطقة، ووقت يونكس، ووقت محلي مع فرق، وترويسة Date بالإيميل). وحّد كل إشي على UTC قبل الترتيب، وسجّل ساعة ومنطقة كل مصدر، وخلّي القيمة الأصلية جنب المحوّلة عشان غيرك يقدر يراجع شغلك. لما تترتّب صح، الليلة بتبيّن شكلها: حوالي خمس ساعات من إيميل التصيّد لطلوع البيانات، و36 دقيقة بس من دخول الـ VPN للتسريب.',
+      ar: 'الخط الزمني يحوّل الأدلة المتفرقة إلى قصة واحدة، والوقت هو الجزء الصعب: كل مصدر يكتبه بطريقته (صيغة ISO مع الحرف Z، و syslog دون سنة ولا منطقة زمنية، وتوقيت يونكس، وتوقيت محلي مع فرق، وترويسة `Date` في البريد). وحّد كل الأوقات على UTC قبل الترتيب، وسجّل ساعة كل مصدر ومنطقته الزمنية، واحتفظ بالقيمة الأصلية بجانب القيمة المحوَّلة ليستطيع غيرك مراجعة عملك. وعند الترتيب الصحيح يتضح شكل الليلة: نحو خمس ساعات من رسالة التصيّد إلى خروج البيانات، و36 دقيقة فقط من الدخول عبر VPN إلى التسريب.',
     },
     realTools: ['Plaso / log2timeline', 'Timesketch', 'Elastic / Splunk timeline views', 'date -d @epoch'],
     takeaway: {
       en: 'Convert to UTC first, sort second. One wrong offset can reorder the whole story.',
-      ar: 'حوّل لـ UTC أول، ورتّب بعدين. فرق توقيت واحد غلط بيقدر يقلب القصة كلها.',
+      ar: 'حوّل إلى UTC أولاً، ثم رتّب. فرق توقيت واحد خاطئ قد يقلب القصة كلها.',
     },
     source: 'NIST SP 800-86 (Integrating Forensic Techniques into Incident Response); NIST SP 800-61r3; RFC 3339 (Date and Time on the Internet: Timestamps)',
   },
   echo: {
-    intro: { en: 'Every source keeps its own clock. Put them all on one.', ar: 'كل مصدر إله ساعته. حطّهم كلهم على ساعة وحدة.' },
+    intro: { en: 'Every source keeps its own clock. Put them all on one.', ar: 'لكل مصدر ساعته الخاصة. ضعها كلها على ساعة واحدة.' },
     success: {
       en: 'Phish to data out in about five hours; VPN to exfil in 36 minutes. Act 4 closed. Next: the files themselves.',
-      ar: 'من التصيّد لطلوع البيانات حوالي خمس ساعات؛ ومن الـ VPN للتسريب 36 دقيقة. سكّرنا الفصل الرابع. الجاي: الملفات نفسها.',
+      ar: 'من رسالة التصيّد إلى خروج البيانات نحو خمس ساعات، ومن الدخول عبر VPN إلى التسريب 36 دقيقة. انتهى الفصل الرابع. التالي: الملفات نفسها.',
     },
   },
   ghost: {
     taunt: {
       en: 'A beautiful timeline. Every minute accounted for, and still no face. Keep counting, investigator.',
-      ar: 'خط زمني حلو. كل دقيقة محسوبة، ولسا ما في وجه. كمّل عدّ يا محقق.',
+      ar: 'خط زمني جميل. كل دقيقة محسوبة، وما زلتَ لا تعرف وجهي. واصل العدّ أيها المحقق.',
     },
   },
   solution: `UTC: C 22:31 (Mar 12), E 22:47, A 05:12+0200=03:12, G 22:20-0500=03:20 Mar 13, F 03:45, D date -d @${unixTime(ACT4.pushedAt)}=03:49, H 03:50, B 04:03. Stranger: I (${ACT3.bruteIp}). Order ${ORDER}. A->D 36-37 min. Control: mfa.`,

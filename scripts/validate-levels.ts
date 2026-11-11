@@ -5,8 +5,10 @@ import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { EvidenceDef, L, LevelConfig } from '../src/engine/schema';
+import { guideCost } from '../src/engine/guide';
 import { Shell } from '../src/engine/shell/shell';
 import { Vfs } from '../src/engine/vfs';
+import { PLACEHOLDERS_AR } from '../src/i18n/placeholders';
 import { levelsInOrder } from '../src/levels/manifest';
 import { IMPLEMENTED_APPS } from '../src/os/apps/implemented';
 
@@ -14,7 +16,6 @@ const errors: string[] = [];
 const warnings: string[] = [];
 const err = (id: string, message: string) => errors.push(`${id}: ${message}`);
 const warn = (id: string, message: string) => warnings.push(`${id}: ${message}`);
-const TIERS = ['nudge', 'direction', 'near-solution'];
 
 async function loadConfigs(): Promise<Map<string, LevelConfig>> {
   const root = join(import.meta.dirname, '..', 'src', 'levels');
@@ -32,7 +33,15 @@ async function loadConfigs(): Promise<Map<string, LevelConfig>> {
 
 function checkL(id: string, where: string, text: L | undefined): void {
   if (!text?.en?.trim()) err(id, `${where}: missing English text`);
-  else if (!text.ar?.trim()) warn(id, `${where}: missing Arabic translation`);
+  else if (!text.ar?.trim()) err(id, `${where}: missing Arabic translation`);
+  else {
+    for (const [lang, value] of [['en', text.en], ['ar', text.ar]] as const) {
+      if ((value.match(/`/g)?.length ?? 0) % 2) err(id, `${where} (${lang}): unbalanced backticks`);
+    }
+    // In Arabic, a command or path outside `backticks` jumps sides in a right-to-left sentence.
+    const plain = text.ar.replace(/`[^`]*`/g, ' ');
+    if (/(^|[\s(])[/~$][A-Za-z0-9]|[A-Za-z0-9] -{1,2}[A-Za-z]/.test(plain)) warn(id, `${where}: Arabic text has a command or path outside backticks`);
+  }
 }
 
 function corpus(config: LevelConfig): string {
@@ -124,17 +133,28 @@ async function main() {
     checkL(id, 'echo.success', config.echo.success);
     checkL(id, 'debrief.concept', config.debrief.concept);
     checkL(id, 'debrief.takeaway', config.debrief.takeaway);
+    if (config.intel) checkL(id, 'intel.text', config.intel.text);
+    if (config.ghost) checkL(id, 'ghost.taunt', config.ghost.taunt);
     if (!config.debrief.source.trim()) err(id, 'debrief.source is required (accuracy)');
     if (!config.debrief.realTools.length) err(id, 'debrief.realTools is empty');
 
-    // 5. Hints
-    config.hints.forEach((hint, index) => {
-      if (hint.tier !== TIERS[index]) err(id, `hint ${index + 1} tier should be ${TIERS[index]}`);
-      checkL(id, `hint ${index + 1}`, hint.text);
-      if (index > 0 && hint.cost < config.hints[index - 1].cost) err(id, 'hint costs must not decrease');
-    });
-    const hintCost = config.hints.reduce((sum, hint) => sum + hint.cost, 0);
-    if (hintCost >= config.rewards.points) err(id, 'hints cost as much as the level reward');
+    // 5. Mission and guide: every level states its goal, where to look and what done means,
+    // and the solution tier has one step for every objective.
+    checkL(id, 'mission.goal', config.mission.goal);
+    checkL(id, 'mission.success', config.mission.success);
+    if (config.mission.investigate.length < 2 || config.mission.investigate.length > 4) err(id, 'mission.investigate needs 2 to 4 items');
+    config.mission.investigate.forEach((item, index) => checkL(id, `mission.investigate ${index + 1}`, item));
+    checkL(id, 'guide.nudge', config.guide.nudge);
+    checkL(id, 'guide.clue', config.guide.clue);
+    checkL(id, 'guide.concept', config.guide.concept);
+    for (const objective of config.objectives) {
+      if (!config.guide.steps[objective.id]) err(id, `guide.steps is missing objective ${objective.id}`);
+      else checkL(id, `guide.steps.${objective.id}`, config.guide.steps[objective.id]);
+    }
+    for (const key of Object.keys(config.guide.steps)) {
+      if (!config.objectives.some((objective) => objective.id === key)) err(id, `guide.steps has unknown objective ${key}`);
+    }
+    if ([0, 1, 2].reduce((sum, tier) => sum + guideCost(config, tier), 0) >= config.rewards.points) err(id, 'guide tiers cost as much as the level reward');
 
     // 6. Objectives
     const objectiveIds = new Set<string>();
@@ -146,6 +166,10 @@ async function main() {
       if (objectiveIds.has(objective.id)) err(id, `duplicate objective ${objective.id}`);
       objectiveIds.add(objective.id);
       checkL(id, `objective ${objective.id}`, objective.prompt);
+      if (objective.wrong) checkL(id, `objective ${objective.id} wrong`, objective.wrong);
+      if (objective.placeholder && /^[A-Za-z][a-z]+( [A-Za-z][a-z]+)*$/.test(objective.placeholder) && !PLACEHOLDERS_AR[objective.placeholder]) {
+        err(id, `${objective.id}: placeholder "${objective.placeholder}" has no Arabic text (i18n PLACEHOLDERS_AR)`);
+      }
       const v = objective.validator;
       switch (v.kind) {
         case 'answer': {

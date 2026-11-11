@@ -56,6 +56,8 @@ interface GameActions {
   collectIntel: (intelId: string) => void;
   spendIntel: (levelId: string) => boolean;
   completeLevel: (levelId: string, record: LevelRecord) => void;
+  /** Replay: the case starts over (objectives and guide tiers). The best score and the evidence stay. */
+  restartLevel: (levelId: string) => void;
   linkEvidence: (a: string, b: string) => void;
   moveCard: (id: string, x: number, y: number) => void;
   unlockAchievement: (id: string) => boolean;
@@ -73,7 +75,9 @@ function defaultSettings(): Settings {
   const reducedMotion = typeof matchMedia !== 'undefined' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const weakDevice = typeof navigator !== 'undefined' &&
     ((navigator.hardwareConcurrency ?? 8) <= 4 || /Mobi|Android/i.test(navigator.userAgent));
-  return { lang: 'en', quality: weakDevice ? 'low' : 'high', volume: 0.7, muted: false, reducedMotion };
+  // First visit: follow the browser language. After that the saved choice wins.
+  const arabic = typeof navigator !== 'undefined' && /^ar\b/i.test(navigator.language ?? '');
+  return { lang: arabic ? 'ar' : 'en', quality: weakDevice ? 'low' : 'high', volume: 0.7, muted: false, reducedMotion };
 }
 
 function emptyProgress(): Omit<GameData, 'settings' | 'callsign'> {
@@ -148,6 +152,13 @@ export const useGame = create<GameState>()(
           if (previous && previous.score >= record.score) return state;
           return { completed: { ...state.completed, [levelId]: record } };
         }),
+
+      restartLevel: (levelId) =>
+        set((state) => ({
+          objectives: { ...state.objectives, [levelId]: [] },
+          hints: { ...state.hints, [levelId]: 0 },
+          freeHints: { ...state.freeHints, [levelId]: [] },
+        })),
 
       linkEvidence: (a, b) =>
         set((state) => {

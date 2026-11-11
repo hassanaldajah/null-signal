@@ -9,7 +9,31 @@ const level: LevelConfig = {
   requires: { levels: ['L04'], evidence: ['ev.l03.handle', 'ev.l03.beacon', 'ev.l04.account', 'ev.l02.time'] },
   briefing: {
     en: 'MINI-BOSS. The attacker had two accounts and a beacon. But beacons die on reboot, so how do they plan to stay? Find the file they changed to keep access. Use `find` to filter the whole system by permissions, time and owner, and connect it to what you already know.',
-    ar: 'زعيم الفصل. المهاجم معه حسابين وبرنامج اتصال. بس برنامج الاتصال بيموت مع إعادة التشغيل، فكيف ناوي يضل؟ لاقي الملف اللي غيّره ليحافظ على وصوله. استخدم `find` لتفلتر النظام كله حسب الصلاحيات والوقت والمالك، واربطه باللي بتعرفه.',
+    ar: 'تحدّي الفصل. المهاجم يملك حسابين وبرنامج اتصال. لكن هذا البرنامج يتوقف عند إعادة تشغيل الجهاز، فكيف ينوي البقاء؟ اعثر على الملف الذي عدّله ليحافظ على وصوله. استخدم الأمر `find` لتصفية ملفات النظام كله حسب الصلاحيات والوقت والمالك، واربط النتيجة بما تعرفه.',
+  },
+  mission: {
+    goal: {
+      en: 'Find the file the attacker changed so that his program starts again by itself.',
+      ar: 'اعثر على الملف الذي عدّله المهاجم ليعود برنامجه إلى العمل تلقائياً.',
+    },
+    investigate: [
+      {
+        en: 'Files that any user can write to: `find / -type f -perm -002`.',
+        ar: 'الملفات التي يستطيع أي مستخدم الكتابة فيها: `find / -type f -perm -002`.',
+      },
+      {
+        en: 'Files changed on Mar 13, the night of the break-in: `find / -type f -newermt 2026-03-13`.',
+        ar: 'الملفات التي عُدّلت في 13 آذار، ليلة الاختراق: `find / -type f -newermt 2026-03-13`.',
+      },
+      {
+        en: 'The file `/etc/cron.d/helix-backup`: it shows which script root runs every hour.',
+        ar: 'الملف `/etc/cron.d/helix-backup`: يبيّن أي سكربت يشغّله root كل ساعة.',
+      },
+    ],
+    success: {
+      en: 'You have named the changed script and the account that owns it, and explained why it is dangerous. The Act 1 summary is pinned to your board.',
+      ar: 'تكون قد حدّدت السكربت المعدَّل والحساب الذي يملكه، وشرحت سبب خطورته. تُثبَّت خلاصة الفصل الأول على لوحة الأدلة.',
+    },
   },
   apps: ['case', 'terminal', 'files', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -39,8 +63,8 @@ const level: LevelConfig = {
     {
       id: 'perm',
       prompt: {
-        en: 'Find every WORLD-WRITABLE file on the system (writable by any user).',
-        ar: 'لاقي كل ملف قابل للكتابة من أي مستخدم على النظام.',
+        en: 'In the terminal, use `find` to list every file on the system that ANY user can write to.',
+        ar: 'في الطرفية، استخدم `find` لعرض كل ملف في النظام يستطيع أي مستخدم الكتابة فيه.',
       },
       validator: { kind: 'command', pattern: '^find\\b.*-perm\\s+(-|/)?0?(002|666|777)' },
     },
@@ -48,18 +72,18 @@ const level: LevelConfig = {
       id: 'file',
       prompt: {
         en: 'Which of them was modified during the intrusion (Mar 13) and is executed automatically?',
-        ar: 'أي واحد منهم تعدّل وقت الاختراق (13 آذار) وبيتشغّل تلقائياً؟',
+        ar: 'أي ملف منها عُدّل وقت الاختراق (13 آذار) ويعمل تلقائياً؟',
       },
       placeholder: '/path/to/file',
       validator: { kind: 'answer', accept: [ACT1.persistence] },
       wrong: {
         en: 'World-writable alone is not enough: one of them is an old shared folder. Check WHEN each was modified (`ls -l` or `find -newermt`) and what runs it (/etc/cron.d).',
-        ar: 'قابل للكتابة لحاله مش كفاية: واحد منهم مجلد مشترك قديم. شوف إمتى تعدّل كل واحد (`ls -l` أو `find -newermt`) وشو اللي بيشغّله (/etc/cron.d).',
+        ar: 'كون الملف قابلاً للكتابة من الجميع لا يكفي: أحد الملفين ملف مشترك قديم. تحقق متى عُدّل كل ملف (`ls -l` أو `find -newermt`) وما الذي يشغّله (`/etc/cron.d`).',
       },
       grants: [
         {
           id: 'ev.l05.persistence',
-          title: { en: 'Persistence: hijacked cron script', ar: 'الاستمرارية: سكريبت cron مخطوف' },
+          title: { en: 'Persistence: hijacked cron script', ar: 'وسيلة البقاء: سكربت مجدول تم العبث به' },
           type: 'file',
           content: `${ACT1.persistence} (777, run hourly as root)`,
           links: ['ev.l03.beacon', 'ev.l03.handle'],
@@ -69,29 +93,29 @@ const level: LevelConfig = {
     {
       id: 'owner',
       prompt: {
-        en: 'Which account modified it? It should match one of your earlier findings.',
-        ar: 'أي حساب عدّله؟ لازم يطابق واحد من اكتشافاتك السابقة.',
+        en: 'Which account owns that script now? (`ls -l` shows the owner. You met this account in the last case.)',
+        ar: 'أي حساب يملك هذا السكربت الآن؟ (الأمر `ls -l` يعرض المالك، وقد رأيت هذا الحساب في القضية السابقة.)',
       },
       validator: { kind: 'evidence', evidence: 'ev.l04.account' },
-      wrong: { en: '`ls -l` shows the owner in the third column.', ar: '`ls -l` بيوري المالك بالعمود الثالث.' },
+      wrong: { en: '`ls -l` shows the owner in the third column.', ar: 'الأمر `ls -l` يعرض اسم المالك في العمود الثالث.' },
     },
     {
       id: 'why',
       prompt: {
         en: 'Why is a world-writable script that root runs every hour so dangerous?',
-        ar: 'ليش سكريبت قابل للكتابة من الكل وبيشغّله root كل ساعة خطير لهالدرجة؟',
+        ar: 'لماذا يُعدّ خطيراً جداً أن يوجد سكربت يستطيع الجميع الكتابة فيه ويشغّله root كل ساعة؟',
       },
       validator: {
         kind: 'choice',
         correct: 'root',
         options: [
-          { id: 'disk', label: { en: 'It fills the disk with backups', ar: 'بيعبّي القرص بالنسخ الاحتياطية' } },
-          { id: 'root', label: { en: 'Any user can add commands that will then run as root', ar: 'أي مستخدم بيقدر يضيف أوامر رح تتشغّل بعدين بصلاحيات root' } },
-          { id: 'slow', label: { en: 'It slows the server down', ar: 'بيبطّئ السيرفر' } },
-          { id: 'logs', label: { en: 'It deletes the logs', ar: 'بيمسح السجلات' } },
+          { id: 'disk', label: { en: 'It fills the disk with backups', ar: 'لأنه يملأ القرص بالنسخ الاحتياطية' } },
+          { id: 'root', label: { en: 'Any user can add commands that will then run as root', ar: 'لأن أي مستخدم يستطيع إضافة أوامر ستعمل لاحقاً بصلاحيات root' } },
+          { id: 'slow', label: { en: 'It slows the server down', ar: 'لأنه يُبطئ الخادم' } },
+          { id: 'logs', label: { en: 'It deletes the logs', ar: 'لأنه يحذف السجلات' } },
         ],
       },
-      wrong: { en: 'Think about who can write it and who executes it.', ar: 'فكّر مين بيقدر يكتب فيه ومين بيشغّله.' },
+      wrong: { en: 'Think about who can write it and who executes it.', ar: 'فكّر: من يستطيع الكتابة في الملف؟ ومن يشغّله؟' },
       grants: [
         {
           id: 'ev.l05.summary',
@@ -103,57 +127,63 @@ const level: LevelConfig = {
       ],
     },
   ],
-  hints: [
-    {
-      tier: 'nudge',
-      text: {
-        en: '`man find` — look at -perm, -newermt and -user. Combine tests to narrow down.',
-        ar: '`man find`؛ شوف -perm و -newermt و -user. اجمع الشروط لتضيّق النتائج.',
-      },
-      cost: 20,
+  guide: {
+    nudge: {
+      en: '`man find`: look at `-perm`, `-newermt` and `-user`. Combine tests to narrow the results.',
+      ar: 'راجع `man find` وانظر إلى الخيارات `-perm` و`-newermt` و`-user`. اجمع الشروط لتقليل النتائج.',
     },
-    {
-      tier: 'direction',
-      text: {
-        en: '`find / -type f -perm -002` lists world-writable files. Then `find / -type f -newermt 2026-03-13` lists recent changes. Which path is in BOTH?',
-        ar: '`find / -type f -perm -002` بيعرض الملفات القابلة للكتابة من الكل، و `find / -type f -newermt 2026-03-13` بيعرض التعديلات الحديثة. أي مسار موجود بالاثنين؟',
-      },
-      cost: 40,
+    clue: {
+      en: '`find / -type f -perm -002` lists world-writable files. Then `find / -type f -newermt 2026-03-13` lists recent changes. Which path is in BOTH?',
+      ar: 'الأمر `find / -type f -perm -002` يعرض الملفات التي يستطيع أي مستخدم الكتابة فيها، والأمر `find / -type f -newermt 2026-03-13` يعرض ما تغيّر حديثاً. أي مسار يظهر في النتيجتين معاً؟',
     },
-    {
-      tier: 'near-solution',
-      text: {
-        en: 'Look in /opt/helix/bin with `ls -l`, and read /etc/cron.d/helix-backup to see what runs every hour.',
-        ar: 'اتطلّع على /opt/helix/bin بـ `ls -l`، واقرأ /etc/cron.d/helix-backup لتعرف شو بيتشغّل كل ساعة.',
+    steps: {
+      perm: {
+        en: 'Type `find / -type f -perm -002`. It lists the files that every user can write to.',
+        ar: 'اكتب `find / -type f -perm -002`. يعرض هذا الأمر الملفات التي يستطيع كل مستخدم الكتابة فيها.',
       },
-      cost: 60,
+      file: {
+        en: 'Two files appear. `/srv/shared/drop/README.txt` is an old shared file. Run `ls -l /opt/helix/bin`: `backup.sh` was changed on Mar 13 at 03:38, and `cat /etc/cron.d/helix-backup` shows that root runs it every hour. The answer is `/opt/helix/bin/backup.sh`.',
+        ar: 'يظهر ملفان. الملف `/srv/shared/drop/README.txt` ملف مشترك قديم. شغّل `ls -l /opt/helix/bin`: الملف `backup.sh` عُدّل في 13 آذار الساعة 03:38، والأمر `cat /etc/cron.d/helix-backup` يبيّن أن root يشغّله كل ساعة. الجواب هو `/opt/helix/bin/backup.sh`.',
+      },
+      owner: {
+        en: 'In the output of `ls -l /opt/helix/bin`, the third column is the owner: `j.ortiz`, the second account from the last case.',
+        ar: 'في ناتج `ls -l /opt/helix/bin` العمود الثالث هو المالك: `j.ortiz`، وهو الحساب الثاني من القضية السابقة.',
+      },
+      why: {
+        en: 'Choose "Any user can add commands that will then run as root". Anyone can write to the script, and root is the one who runs it.',
+        ar: 'اختر «لأن أي مستخدم يستطيع إضافة أوامر ستعمل لاحقاً بصلاحيات root». الجميع يستطيع الكتابة في السكربت، و root هو من يشغّله.',
+      },
     },
-  ],
+    concept: {
+      en: 'To stay inside a system, attackers hide in things that already run by themselves, such as scheduled jobs. A script that everyone can change and that root runs gives full control to anyone. Check who can write to every scheduled script.',
+      ar: 'ليبقى المهاجم داخل النظام، يختبئ في أشياء تعمل تلقائياً، مثل المهام المجدولة. السكربت الذي يستطيع الجميع تعديله ويشغّله root يمنح التحكم الكامل لأي شخص. راجع من يستطيع الكتابة في كل سكربت مجدول.',
+    },
+  },
   rewards: { points: 200, achievement: 'act1-clear' },
   debrief: {
     concept: {
       en: '`find` filters the filesystem by metadata: -perm (permissions), -newermt / -mtime (time), -user (owner), -name (pattern). Permissions like -rwxrwxrwx (777) mean any user can modify the file. If root runs it from cron, anyone can turn it into root-level persistence. Intersecting two filters (writable AND recently changed) is how you cut thousands of files down to one.',
-      ar: '`find` بيفلتر نظام الملفات حسب البيانات الوصفية: -perm (الصلاحيات)، -newermt و -mtime (الوقت)، -user (المالك)، -name (النمط). صلاحيات مثل -rwxrwxrwx (777) معناها أي مستخدم بيقدر يعدّل الملف، وإذا root بيشغّله من cron، فأي حدا بيقدر يحوّله لاستمرارية بصلاحيات root. تقاطع فلترين (قابل للكتابة وتعدّل حديثاً) هو اللي بينزّل آلاف الملفات لملف واحد.',
+      ar: 'الأمر `find` يصفّي ملفات النظام حسب بياناتها الوصفية: `-perm` للصلاحيات، و`-newermt` و`-mtime` للوقت، و`-user` للمالك، و`-name` للاسم. الصلاحيات `-rwxrwxrwx` (أي 777) تعني أن أي مستخدم يستطيع تعديل الملف. وإذا كان root يشغّله من cron، فأي شخص يستطيع تحويله إلى وسيلة بقاء بصلاحيات root. الجمع بين شرطين (قابل للكتابة وعُدّل حديثاً) يختصر آلاف الملفات إلى ملف واحد.',
     },
     realTools: ['find', 'stat', 'ls -l', 'Lynis', 'auditd'],
     takeaway: {
       en: 'Persistence hides inside things that are SUPPOSED to run. Audit permissions on every scheduled script.',
-      ar: 'الاستمرارية بتتخبّى جوّا أشياء المفروض تتشغّل أصلاً. دقّق صلاحيات كل سكريبت مجدول.',
+      ar: 'وسائل البقاء تختبئ داخل أشياء يُفترض أن تعمل أصلاً. راجع صلاحيات كل سكربت مجدول.',
     },
     source: 'MITRE ATT&CK T1053.003 (Scheduled Task/Job: Cron); CIS Benchmark: ensure no world-writable files',
   },
   echo: {
     intro: {
       en: 'A beacon alone dies on reboot. If gh0st wants to stay, something must restart it. Find what changed, when, and who changed it.',
-      ar: 'برنامج الاتصال لحاله بيموت مع إعادة التشغيل. إذا gh0st بدّه يضل، لازم في شي بيرجّع يشغّله. لاقي شو تغيّر، وإمتى، ومين غيّره.',
+      ar: 'برنامج الاتصال وحده يتوقف عند إعادة التشغيل. إذا أراد gh0st أن يبقى، فلا بد من شيء يعيد تشغيله. اعرف ما الذي تغيّر، ومتى، ومن غيّره.',
     },
     success: {
       en: 'Act 1 closed. gh0st got in through a sticky note, sprayed passwords, and hid inside a backup job. But a handle is not a name. Yet.',
-      ar: 'خلص الفصل الأول. gh0st دخل من ورقة لاصقة، رشّ كلمات مرور، وتخبّى جوّا مهمة نسخ احتياطي. بس الاسم المستعار مش اسم حقيقي. لسا.',
+      ar: 'انتهى الفصل الأول. دخل gh0st بفضل ورقة لاصقة، ثم جرّب كلمات مرور على الحسابات، واختبأ داخل مهمة نسخ احتياطي. لكن الاسم المستعار ليس اسماً حقيقياً. ليس بعد.',
     },
   },
   ghost: {
-    taunt: { en: 'You found my little backup. Did you check who taught me the password?', ar: 'لقيت نسختي الاحتياطية الصغيرة. بس هل فحصت مين علّمني كلمة السر؟' },
+    taunt: { en: 'You found my little backup. Did you check who taught me the password?', ar: 'وجدتَ نسختي الاحتياطية الصغيرة. لكن هل سألت نفسك: من الذي أعطاني كلمة المرور؟' },
   },
   solution: 'find / -type f -perm -002 -> backup.sh + /srv/shared/drop/README.txt(old). find / -type f -newermt 2026-03-13 -> backup.sh, .bash_history(600), .sync. Intersection: /opt/helix/bin/backup.sh owned by j.ortiz; cron.d runs it hourly as root.',
   selfTest: [

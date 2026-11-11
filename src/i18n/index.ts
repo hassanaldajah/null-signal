@@ -3,6 +3,7 @@ import type { L, Lang } from '../engine/schema';
 import { useGame } from '../store/game';
 import ar from './ar';
 import en, { type UiKey } from './en';
+import { PLACEHOLDERS_AR } from './placeholders';
 
 const dictionaries: Record<Lang, Partial<Record<UiKey, string>>> = { en, ar };
 
@@ -17,6 +18,11 @@ export function translate(lang: Lang, key: UiKey, vars?: Record<string, string |
 export function localize(lang: Lang, text?: L): string {
   if (!text) return '';
   return lang === 'ar' && text.ar ? text.ar : text.en;
+}
+
+export function placeholderFor(lang: Lang, text?: string): string {
+  if (!text) return '…';
+  return lang === 'ar' ? PLACEHOLDERS_AR[text] ?? text : text;
 }
 
 export function useI18n() {

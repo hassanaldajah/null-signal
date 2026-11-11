@@ -11,6 +11,7 @@
     "validate": "tsx scripts/validate-levels.ts",
     "fuzz": "tsx scripts/shell-fuzz.ts",
     "solutions": "tsx scripts/export-solutions.ts",
+    "texts": "tsx scripts/export-texts.ts",
     "check": "node scripts/browser-check.mjs",
     "sfx": "node scripts/gen-sfx.mjs",
     "postinstall": "node scripts/copy-draco.mjs",

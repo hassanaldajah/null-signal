@@ -58,7 +58,7 @@ export default function Logs() {
           spellCheck={false}
         />
         <label className="hidden-toggle">
-          <input type="checkbox" checked={regex} onChange={(event) => setRegex(event.target.checked)} /> regex
+          <input type="checkbox" checked={regex} onChange={(event) => setRegex(event.target.checked)} /> {t('logs.regex')}
         </label>
       </div>
       <div className="logs-meta mono">

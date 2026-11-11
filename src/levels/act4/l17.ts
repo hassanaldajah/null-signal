@@ -58,7 +58,31 @@ const level: LevelConfig = {
   requires: { levels: ['L16'], evidence: ['ev.l02.ip', 'ev.l16.archive'] },
   briefing: {
     en: `The intranet web server ${ACT4.webHost} keeps one line for every file it hands out: who asked (IP), when, which file, the status code, how many bytes were sent and which program asked (user agent). Hundreds of normal rows; one of them is a file leaving the company. Find the row that does not fit the pattern.`,
-    ar: `سيرفر الإنترانت ${ACT4.webHost} بيسجّل سطر لكل ملف بيعطيه: مين طلب (IP)، ووقتيش، وأي ملف، ورمز الحالة، وكم بايت انبعث، وأي برنامج طلب (user agent). مئات الأسطر العادية، وواحد منها ملف طالع برّا الشركة. لاقي السطر اللي ما بيمشي مع النمط.`,
+    ar: 'خادم الشبكة الداخلية `helix-web01` يسجّل سطراً لكل ملف يرسله: من طلبه (عنوان IP)، ومتى، وأي ملف، ورمز الحالة، وعدد البايتات المرسلة، والبرنامج الذي طلبه (`user agent`). مئات الأسطر العادية، وسطر واحد منها ملف يخرج من الشركة. اعثر على السطر الذي لا يوافق النمط.',
+  },
+  mission: {
+    goal: {
+      en: 'Find the one download in the web server log that does not fit the normal pattern.',
+      ar: 'اعثر في سجل خادم الويب على عملية التنزيل الوحيدة التي لا توافق النمط المعتاد.',
+    },
+    investigate: [
+      {
+        en: 'The note "Ops: what normal looks like" in the Notes app. It describes normal traffic.',
+        ar: 'ملاحظة فريق التشغيل في تطبيق الملاحظات: تصف حركة الطلبات الطبيعية.',
+      },
+      {
+        en: 'The file `/var/log/nginx/access.log`: each line has the IP, the time, the file, the status, the size in bytes and the program that asked.',
+        ar: 'الملف `/var/log/nginx/access.log`: في كل سطر عنوان IP، والوقت، والملف، ورمز الحالة، والحجم بالبايت، والبرنامج الذي أرسل الطلب.',
+      },
+      {
+        en: 'The biggest downloads, and anything under `/backup/` that is not the nightly NovaBackup pull at 02:00.',
+        ar: 'أكبر التنزيلات، وكل ما يقع داخل `/backup/` وليس من عملية النسخ الليلية لشركة NovaBackup الساعة 02:00.',
+      },
+    ],
+    success: {
+      en: 'You have named the leaked file, the IP that took it and the program it used, and chosen the right fix.',
+      ar: 'تكون قد كتبت اسم الملف المسرَّب، والعنوان الذي أخذه، والبرنامج الذي استخدمه، واخترت الإصلاح الصحيح.',
+    },
   },
   apps: ['case', 'logs', 'terminal', 'notes', 'evidence'],
   autoOpen: ['case', 'evidence', 'logs'],
@@ -82,31 +106,31 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'file',
-      prompt: { en: 'Which file was downloaded outside the normal pattern?', ar: 'أي ملف انحمّل برّا النمط العادي؟' },
+      prompt: { en: 'In `access.log`, which file was downloaded outside the normal pattern?', ar: 'في السجل `access.log`، أي ملف نُزّل خارج النمط المعتاد؟' },
       placeholder: '/path',
       validator: { kind: 'answer', accept: [ACT4.leakedPath, 'helix-intranet.sql.gz'] },
       wrong: {
         en: 'Big downloads stand out: sort by the bytes column. Then compare each big row with the ops note.',
-        ar: 'التنزيلات الكبيرة بتبيّن: رتّب حسب عمود البايتات. وبعدين قارن كل سطر كبير مع ملاحظة الفريق.',
+        ar: 'التنزيلات الكبيرة تظهر بوضوح: رتّب حسب عمود البايتات. ثم قارن كل سطر كبير بملاحظة فريق التشغيل.',
       },
     },
     {
       id: 'ip',
-      prompt: { en: 'Which IP downloaded it?', ar: 'أي IP نزّله؟' },
+      prompt: { en: 'Which IP downloaded it?', ar: 'أي عنوان IP نزّله؟' },
       placeholder: '0.0.0.0',
       validator: { kind: 'answer', accept: [ACT4.attackerIp] },
-      wrong: { en: 'The IP is the first field of the same line.', ar: 'الـ IP هو أول حقل بنفس السطر.' },
+      wrong: { en: 'The IP is the first field of the same line.', ar: 'عنوان IP هو أول حقل في السطر نفسه.' },
     },
     {
       id: 'agent',
-      prompt: { en: 'Which program made the request (user agent)?', ar: 'أي برنامج عمل الطلب (user agent)؟' },
+      prompt: { en: 'Which program made the request? (the `user agent`)', ar: 'أي برنامج أرسل الطلب؟ (قيمة `user agent`)' },
       placeholder: 'name/version',
       validator: { kind: 'answer', accept: [TOOL, 'curl'] },
-      wrong: { en: 'The user agent is the last quoted part of the line.', ar: 'الـ user agent هو آخر جزء بين علامتي تنصيص بالسطر.' },
+      wrong: { en: 'The user agent is the last quoted part of the line.', ar: 'قيمة `user agent` هي آخر جزء بين علامتي تنصيص في السطر.' },
       grants: [
         {
           id: 'ev.l17.leak',
-          title: { en: 'Intranet backup downloaded from outside', ar: 'نسخة الإنترانت الاحتياطية انحمّلت من برّا' },
+          title: { en: 'Intranet backup downloaded from outside', ar: 'نسخة الشبكة الداخلية الاحتياطية نُزّلت من الخارج' },
           type: 'file',
           content: `${ACT4.leakedPath} (${LEAK_BYTES} bytes) -> ${ACT4.attackerIp} via ${TOOL}, Mar 13 04:03`,
           links: ['ev.l02.ip', 'ev.l16.archive'],
@@ -115,43 +139,70 @@ const level: LevelConfig = {
     },
     {
       id: 'fix',
-      prompt: { en: 'What is the right fix?', ar: 'شو الحل الصحيح؟' },
+      prompt: { en: 'What is the right fix?', ar: 'ما الإصلاح الصحيح؟' },
       validator: {
         kind: 'choice',
         correct: 'move',
         options: [
-          { id: 'move', label: { en: 'Keep backups out of any folder the web server serves, and alert on big downloads that break the baseline', ar: 'إبعاد النسخ الاحتياطية عن أي مجلد بيعرضه سيرفر الويب، والتنبيه على التنزيلات الكبيرة اللي بتكسر النمط' } },
-          { id: 'rename', label: { en: 'Rename the file to something harder to guess', ar: 'تغيير اسم الملف لاسم أصعب يتخمّن' } },
-          { id: 'curl', label: { en: 'Block the curl user agent', ar: 'حظر الـ user agent تبع curl' } },
+          { id: 'move', label: { en: 'Keep backups out of any folder the web server serves, and alert on big downloads that break the baseline', ar: 'إبعاد النسخ الاحتياطية عن أي مجلد يعرضه خادم الويب، والتنبيه عند أي تنزيل كبير يخالف النمط المعتاد' } },
+          { id: 'rename', label: { en: 'Rename the file to something harder to guess', ar: 'تغيير اسم الملف إلى اسم يصعب تخمينه' } },
+          { id: 'curl', label: { en: 'Block the curl user agent', ar: 'حظر البرنامج curl' } },
         ],
       },
       wrong: {
         en: 'A hidden name and a blocked user agent are both one line away from being bypassed. Where should the file live?',
-        ar: 'الاسم المخفي وحظر الـ user agent الاثنين بينتجاوزوا بسطر واحد. وين لازم يكون الملف أصلاً؟',
+        ar: 'الاسم المخفي وحظر اسم البرنامج يمكن تجاوزهما بسطر واحد. أين يجب أن يوجد الملف أصلاً؟',
       },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: 'Read the ops note first: it tells you what normal looks like.', ar: 'اقرأ ملاحظة الفريق أول: بتحكيلك شو الطبيعي.' }, cost: 15 },
-    { tier: 'direction', text: { en: 'In the terminal: sort -n -k 10 access.log puts the biggest downloads at the bottom. Which big one is not the nightly agent?', ar: 'بالطرفية: sort -n -k 10 access.log بيحط أكبر التنزيلات تحت. أي واحد كبير مش تبع الوكيل الليلي؟' }, cost: 30 },
-    { tier: 'near-solution', text: { en: `grep backup access.log, then look for the row that is not ${ACT4.vendorIp} at 02:00.`, ar: `grep backup access.log، ودوّر على السطر اللي مش ${ACT4.vendorIp} الساعة 02:00.` }, cost: 45 },
-  ],
+  guide: {
+    nudge: {
+      en: 'Read the ops note first: it tells you what normal looks like.',
+      ar: 'اقرأ ملاحظة فريق التشغيل أولاً: إنها تصف الوضع الطبيعي.',
+    },
+    clue: {
+      en: 'In the terminal, `sort -n -k 10 access.log` puts the biggest downloads at the bottom. Which big one is not the nightly agent?',
+      ar: 'في الطرفية: الأمر `sort -n -k 10 access.log` يضع أكبر التنزيلات في الأسفل. أي تنزيل كبير منها ليس من برنامج النسخ الليلي؟',
+    },
+    steps: {
+      file: {
+        en: 'In the terminal, run `sort -n -k 10 access.log`. The biggest rows are at the bottom: three nightly pulls by `NovaBackup-Agent` at 02:00, and one other file, `/backup/helix-intranet.sql.gz`.',
+        ar: 'في الطرفية شغّل `sort -n -k 10 access.log`. أكبر الأسطر في الأسفل: ثلاث عمليات نسخ ليلية نفّذها `NovaBackup-Agent` الساعة 02:00، وملف آخر واحد هو `/backup/helix-intranet.sql.gz`.',
+      },
+      ip: {
+        en: 'The first field of that line is the client: `203.0.113.77`.',
+        ar: 'أول حقل في ذلك السطر هو عنوان العميل: `203.0.113.77`.',
+      },
+      agent: {
+        en: 'The last quoted part of the same line is the program: `curl/8.5.0`. Staff use Firefox, and the vendor uses its own agent.',
+        ar: 'آخر جزء بين علامتي تنصيص في السطر نفسه هو البرنامج: `curl/8.5.0`. الموظفون يستخدمون Firefox، والمورّد يستخدم برنامجه الخاص.',
+      },
+      fix: {
+        en: 'Choose "Keep backups out of any folder the web server serves, and alert on big downloads that break the baseline".',
+        ar: 'اختر الجواب الذي يُبعد النسخ الاحتياطية عن أي مجلد يعرضه خادم الويب، وينبّه عند التنزيلات الكبيرة غير المعتادة.',
+      },
+    },
+    concept: {
+      en: 'A web access log lists everything the server handed out. To find a leak, first learn what normal looks like, then look for the row that breaks it: an unusual size, time, address or program. A backup must never sit in a folder the web server can serve.',
+      ar: 'سجل الوصول في خادم الويب يسرد كل ما أرسله الخادم. لتكشف تسريباً، اعرف أولاً شكل الوضع الطبيعي، ثم ابحث عن السطر الذي يخالفه: حجم أو وقت أو عنوان أو برنامج غير معتاد. والنسخة الاحتياطية لا يجوز أن توجد في مجلد يستطيع خادم الويب عرضه.',
+    },
+  },
   rewards: { points: 150 },
   debrief: {
     concept: {
       en: 'A web access log is a record of everything the server gave away. The useful columns are the client IP, the path, the status code, the size and the user agent. Size is a strong signal: a normal page is kilobytes, a database dump is megabytes. But size alone is not enough (the nightly backup is bigger), so you compare against a baseline: who normally downloads what, and when. The root cause here is a backup stored inside the web root, where any request can reach it.',
-      ar: 'سجل الوصول لسيرفر الويب هو سجل لكل شي السيرفر أعطاه. الأعمدة المفيدة: IP العميل، والمسار، ورمز الحالة، والحجم، والـ user agent. الحجم إشارة قوية: الصفحة العادية كيلوبايتات، وتفريغ قاعدة البيانات ميغابايتات. بس الحجم لحاله مش كافي (النسخة الليلية أكبر)، فبتقارن مع خط الأساس: مين عادةً بينزّل شو، ووقتيش. والسبب الأساسي هون نسخة احتياطية محطوطة جوّا مجلد الويب، وين أي طلب بيوصلها.',
+      ar: 'سجل الوصول في خادم الويب قائمة بكل ما أرسله الخادم. الأعمدة المفيدة: عنوان العميل، والمسار، ورمز الحالة، والحجم، واسم البرنامج. الحجم إشارة قوية: الصفحة العادية بالكيلوبايت، ونسخة قاعدة البيانات بالميغابايت. لكن الحجم وحده لا يكفي (النسخة الليلية أكبر)، ولذلك تقارن بالوضع الطبيعي: من ينزّل ماذا في العادة، ومتى. السبب الأساسي هنا نسخة احتياطية محفوظة داخل مجلد الويب، حيث يصل إليها أي طلب.',
     },
     realTools: ['GoAccess', 'Elastic / Kibana', 'Wazuh', 'AWStats', 'nginx deny rules'],
     takeaway: {
       en: 'Know your normal, then look for rows that break it. And never keep backups where the web server can serve them.',
-      ar: 'اعرف الطبيعي عندك، وبعدين دوّر على الأسطر اللي بتكسره. وما تخلّي النسخ الاحتياطية أبداً بمكان سيرفر الويب بيقدر يعرضها منه.',
+      ar: 'اعرف الوضع الطبيعي عندك، ثم ابحث عن الأسطر التي تخالفه. ولا تحفظ النسخ الاحتياطية أبداً في مكان يستطيع خادم الويب عرضه.',
     },
     source: 'OWASP WSTG-CONF-04 (Review Old Backup and Unreferenced Files); MITRE ATT&CK T1530/T1213; NIST SP 800-92',
   },
   echo: {
-    intro: { en: 'Web logs are long and boring on purpose. The odd one out is the whole story.', ar: 'سجلات الويب طويلة ومملّة عن قصد. السطر الشاذ هو القصة كلها.' },
-    success: { en: 'Two leaks now: the database exports and the intranet backup. Next: what did they type on the box?', ar: 'صار عنا تسريبين: ملفات قاعدة البيانات ونسخة الإنترانت. السؤال الجاي: شو كتبوا على الجهاز؟' },
+    intro: { en: 'Web logs are long and boring on purpose. The odd one out is the whole story.', ar: 'سجلات الويب طويلة ومملّة عمداً. السطر الشاذ هو القصة كلها.' },
+    success: { en: 'Two leaks now: the database exports and the intranet backup. Next: what did they type on the box?', ar: 'أصبح لدينا تسريبان: ملفات قاعدة البيانات ونسخة الشبكة الداخلية. السؤال التالي: ماذا كتبوا على الجهاز؟' },
   },
   solution: `sort -n -k 10 access.log: bottom rows are 3 nightly NovaBackup pulls (02:00, agent) and ${ACT4.leakedPath} ${LEAK_BYTES} bytes from ${ACT4.attackerIp} with ${TOOL} at 04:03:30 Mar 13. Choice: move.`,
   selfTest: [

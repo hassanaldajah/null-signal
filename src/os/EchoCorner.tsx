@@ -1,20 +1,27 @@
 import { Canvas } from '@react-three/fiber';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Suspense, useEffect, useState } from 'react';
+import { play } from '../audio/sfx';
+import { useI18n } from '../i18n';
 import { useGame } from '../store/game';
 import Character from '../scenes/three/Character';
-import { useEcho } from '../ui/echo';
+import { useEcho, useGuide } from '../ui/echo';
+import Rich, { plainText } from '../ui/Rich';
 import { useTypewriter } from '../ui/useTypewriter';
 
 const SMALL_SCREEN = '(max-width: 760px)';
 
-/** ECHO (the Byte model) in 3D, bottom corner, with a typewriter speech bubble. */
+/** ECHO (the Byte model) in the bottom corner: a typewriter speech bubble and the Guide button. */
 export default function EchoCorner() {
-  const { text, clip, serial, settle } = useEcho();
+  const { t, tl } = useI18n();
+  const { message, clip, serial, settle } = useEcho();
+  const guideOpen = useGuide((state) => state.open);
+  const setGuideOpen = useGuide((state) => state.setOpen);
   const reducedMotion = useGame((state) => state.settings.reducedMotion);
   const quality = useGame((state) => state.settings.quality);
   const [open, setOpen] = useState(true);
-  const { shown, done } = useTypewriter(text, serial, reducedMotion);
+  const text = message ? tl(message) : '';
+  const { shown, done } = useTypewriter(plainText(text), serial, reducedMotion);
 
   useEffect(() => {
     if (text) setOpen(true);
@@ -32,7 +39,7 @@ export default function EchoCorner() {
   return (
     <div className="echo-corner">
       <AnimatePresence>
-        {open && text && (
+        {open && text && !guideOpen && (
           <motion.div
             className="echo-bubble panel"
             initial={{ opacity: 0, y: 10, scale: 0.96 }}
@@ -41,25 +48,38 @@ export default function EchoCorner() {
             onClick={() => setOpen(false)}
           >
             <span className="label">ECHO</span>
-            <p>{shown}<span className="cursor">▍</span></p>
+            <p><Rich text={text} limit={shown.length} /><span className="cursor">▍</span></p>
           </motion.div>
         )}
       </AnimatePresence>
-      <button className="echo-avatar" onClick={() => setOpen((value) => !value)} aria-label="ECHO">
-        <Canvas
-          dpr={quality === 'high' ? [1, 1.5] : 1}
-          camera={{ position: [0, 0.36, 1.75], fov: 36 }}
-          gl={{ alpha: true, antialias: true }}
-          onCreated={({ camera }) => camera.lookAt(0, 0.2, 0)}
+      <div className="echo-dock">
+        <button className="echo-avatar" onClick={() => setOpen((value) => !value)} aria-label="ECHO">
+          <Canvas
+            dpr={quality === 'high' ? [1, 1.5] : 1}
+            camera={{ position: [0, 0.36, 1.75], fov: 36 }}
+            gl={{ alpha: true, antialias: true }}
+            onCreated={({ camera }) => camera.lookAt(0, 0.2, 0)}
+          >
+            <ambientLight intensity={0.6} />
+            <pointLight position={[1, 2, 2]} intensity={10} color="#00e5ff" />
+            <pointLight position={[-0.6, 0.6, -0.8]} intensity={4} color="#00e5ff" />
+            <Suspense fallback={null}>
+              <Character name="byte" clip={clip} rotation={[0, -0.35, 0]} />
+            </Suspense>
+          </Canvas>
+        </button>
+        <button
+          className={`guide-fab${guideOpen ? ' on' : ''}`}
+          aria-expanded={guideOpen}
+          onClick={() => {
+            play(guideOpen ? 'close' : 'open');
+            setGuideOpen(!guideOpen);
+          }}
         >
-          <ambientLight intensity={0.6} />
-          <pointLight position={[1, 2, 2]} intensity={10} color="#00e5ff" />
-          <pointLight position={[-0.6, 0.6, -0.8]} intensity={4} color="#00e5ff" />
-          <Suspense fallback={null}>
-            <Character name="byte" clip={clip} rotation={[0, -0.35, 0]} />
-          </Suspense>
-        </Canvas>
-      </button>
+          <span className="guide-fab-mark" aria-hidden="true">?</span>
+          {t('os.guide')}
+        </button>
+      </div>
     </div>
   );
 }

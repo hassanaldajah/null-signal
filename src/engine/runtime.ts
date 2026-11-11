@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { levelMeta } from '../levels/manifest';
 import { loadLevel } from '../levels/registry';
 import { useGame } from '../store/game';
+import { currentScore, guideCost } from './guide';
 import type { LevelConfig, LevelMeta, Objective } from './schema';
 import { Shell } from './shell/shell';
 import { validate } from './validators';
@@ -24,6 +25,8 @@ interface RuntimeState {
   finished: boolean;
   /** Last evidence ids granted (for the "new evidence" toast + board highlight). */
   fresh: string[];
+  /** Achievement unlocked by finishing this case just now (for the toast). */
+  achievement: string | null;
   start: (levelId: string) => Promise<void>;
   stop: () => void;
   /** The case clock starts when the player accepts the partner's briefing, not on load. */
@@ -42,13 +45,7 @@ export function maxScore(config: LevelConfig): number {
   return config.rewards.points;
 }
 
-/** Points minus the cost of every hint tier revealed, except tiers unlocked with intel. */
-export function currentScore(config: LevelConfig, hintsRevealed: number, freeTiers: readonly number[] = []): number {
-  const spent = config.hints
-    .slice(0, hintsRevealed)
-    .reduce((sum, hint, tier) => sum + (freeTiers.includes(tier) ? 0 : hint.cost), 0);
-  return Math.max(0, config.rewards.points - spent);
-}
+export { currentScore, guideCost };
 
 export const useRuntime = create<RuntimeState>()((set, get) => {
   /** Marks an objective solved, pins its evidence and closes the level when everything is done. */
@@ -71,8 +68,9 @@ export const useRuntime = create<RuntimeState>()((set, get) => {
         completedAt: new Date().toISOString(),
       });
       if (config.intel) useGame.getState().collectIntel(config.intel.id);
-      if (config.rewards.achievement) useGame.getState().unlockAchievement(config.rewards.achievement);
-      set({ finished: true });
+      const achievement = config.rewards.achievement;
+      const unlocked = !!achievement && useGame.getState().unlockAchievement(achievement);
+      set({ finished: true, achievement: unlocked ? achievement : null });
     }
   };
 
@@ -82,9 +80,10 @@ export const useRuntime = create<RuntimeState>()((set, get) => {
     error: null,
     finished: false,
     fresh: [],
+    achievement: null,
 
     start: async (levelId) => {
-      set({ loading: true, error: null, finished: false, runtime: null, fresh: [] });
+      set({ loading: true, error: null, finished: false, runtime: null, fresh: [], achievement: null });
       try {
         const config = await loadLevel(levelId);
         const meta = levelMeta(levelId);

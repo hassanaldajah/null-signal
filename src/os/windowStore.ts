@@ -25,6 +25,12 @@ interface WindowStore {
 }
 
 const TASKBAR = 52;
+const GAP = 14;
+/** Desktop icon column on the inline-start side. */
+const ICONS = 128;
+/** Room kept free under the Case File for ECHO and the Guide button. */
+const ECHO_SPACE = 196;
+const DOCK_MIN_WIDTH = 1100;
 
 export const useWindows = create<WindowStore>()((set, get) => ({
   windows: [],
@@ -42,24 +48,34 @@ export const useWindows = create<WindowStore>()((set, get) => ({
     }
     const viewportW = window.innerWidth;
     const viewportH = window.innerHeight - TASKBAR;
-    const width = Math.min(size.width, viewportW - 24);
-    const height = Math.min(size.height, viewportH - 24);
-    const cascade = (get().windows.length % 6) * 28;
+    let width = Math.min(size.width, viewportW - 24);
+    let height = Math.min(size.height, viewportH - 24);
+    let x = Math.max(12, (viewportW - width) / 2 - 80 + (get().windows.length % 6) * 28);
+    let y = Math.max(12, (viewportH - height) / 2 - 40 + (get().windows.length % 6) * 28);
+
+    // Wide screens: the Case File docks in its own column (above ECHO), tools share the rest,
+    // so the objectives are never hidden behind the terminal.
+    if (viewportW >= DOCK_MIN_WIDTH) {
+      const rtl = document.documentElement.dir === 'rtl';
+      const caseW = Math.round(Math.min(460, Math.max(380, viewportW * 0.3)));
+      if (id === 'case') {
+        width = caseW;
+        height = Math.max(340, viewportH - GAP * 2 - ECHO_SPACE);
+        x = rtl ? GAP : viewportW - caseW - GAP;
+        y = GAP;
+      } else {
+        const room = viewportW - ICONS - caseW - GAP * 2;
+        const cascade = (get().windows.filter((w) => w.id !== 'case').length % 4) * 26;
+        width = Math.min(size.width, room);
+        height = Math.min(size.height, viewportH - GAP * 2);
+        const start = rtl ? caseW + GAP * 2 : ICONS;
+        x = start + Math.min(cascade, Math.max(0, room - width));
+        y = GAP + Math.min(cascade, Math.max(0, viewportH - GAP - height));
+      }
+    }
     set((state) => ({
       topZ: z,
-      windows: [
-        ...state.windows,
-        {
-          id,
-          z,
-          minimized: false,
-          maximized: viewportW < 760,
-          x: Math.max(12, (viewportW - width) / 2 - 80 + cascade),
-          y: Math.max(12, (viewportH - height) / 2 - 40 + cascade),
-          width,
-          height,
-        },
-      ],
+      windows: [...state.windows, { id, z, minimized: false, maximized: viewportW < 760, x, y, width, height }],
     }));
   },
 

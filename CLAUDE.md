@@ -30,6 +30,12 @@ Vite + React + TypeScript, R3F, Zustand, xterm. Characters are built with headle
 - Reply to the owner in Arabic. Ask before any commit or push. Free tools and assets only.
 - No dependencies with recurring CVEs. Dark colours only. Mobile must work (390px wide).
 
+## Text rules
+- Arabic is simple Modern Standard Arabic: short sentences, no dialect. English is equally plain.
+- In player text, put commands, paths and values in `backticks` (rendered left-to-right by `src/ui/Rich.tsx`).
+- Every level has `mission` (goal, investigate, success) and `guide` (nudge, clue, one step per objective, concept).
+  The L27 steps for "initials" and "who" explain the method but never print the answer.
+
 ## Commands
 - `npx tsc --noEmit -p .` typecheck, `npm run validate` level rules + self-tests, `npm run check` browser test
   (run `npx vite build` first), `npm run characters` rebuild GLB characters.

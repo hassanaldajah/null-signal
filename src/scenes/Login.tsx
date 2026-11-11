@@ -8,6 +8,7 @@ import { type UiKey, useI18n } from '../i18n';
 import { useFlow } from '../store/flow';
 import { useGame } from '../store/game';
 import GlitchLogo from '../ui/GlitchLogo';
+import LangSwitch from '../ui/LangSwitch';
 import { useTypewriter } from '../ui/useTypewriter';
 import Character, { type Clip } from './three/Character';
 import Effects from './three/Effects';
@@ -172,7 +173,7 @@ export default function Login() {
         <button className="btn primary" type="submit" disabled={!name.trim()}>
           {t('login.enter')}
         </button>
-        <LanguageToggle />
+        <div className="login-lang"><LangSwitch /></div>
       </motion.form>
     </div>
   );
@@ -214,21 +215,4 @@ function Framing({ phone, cardTop }: { phone: boolean; cardTop: number }) {
   }, [camera, scene, width, height, phone, cardTop]);
 
   return null;
-}
-
-export function LanguageToggle() {
-  const lang = useGame((state) => state.settings.lang);
-  const setSetting = useGame((state) => state.setSetting);
-  return (
-    <button
-      type="button"
-      className="btn ghost lang-toggle"
-      onClick={() => {
-        play('click');
-        setSetting('lang', lang === 'en' ? 'ar' : 'en');
-      }}
-    >
-      {lang === 'en' ? 'العربية' : 'English'}
-    </button>
-  );
 }

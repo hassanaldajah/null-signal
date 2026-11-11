@@ -12,7 +12,11 @@ an evidence board, and learn how real defenders detect, contain and prevent inci
   and the unmasking: containment, checking the cleanup and the final incident report), each act ending with a boss case.
 - Simulated apps: terminal (bash-like, read-only), files, notes, mail, log viewer, hex viewer, browser,
   processes, registry and an evidence board with linked cards.
-- 3-tier hints with score costs, debriefs with real-world tools and sources (NIST, MITRE ATT&CK, RFCs),
+- Every case states its mission, what to investigate and what success looks like, in simple English and
+  simple Modern Standard Arabic (switch language any time; the choice is saved).
+- A Guide button in the corner of every case: nudge, specific clue, then the full step-by-step solution with
+  the security idea behind it. Costs are light (5/10/15% of the case) and shown before you confirm.
+- Debriefs with real-world tools and sources (NIST, MITRE ATT&CK, RFCs),
   ranks, achievements and local saves.
 - 3D characters made in Blender (headless scripts in `blender/`), mobile layout, RTL Arabic.
 
@@ -25,6 +29,7 @@ npm run dev          # http://localhost:5173
 ## Checks
 ```bash
 npm run typecheck    # TypeScript
+npm run texts        # review table of every text (key | English | Arabic), written to the Desktop
 npm run validate     # level rules, evidence graph and in-shell self-tests
 npx vite build && npm run check   # end-to-end check in installed Microsoft Edge
 ```

@@ -96,7 +96,7 @@ await step('L01 lockscreen + choice + debrief', async () => {
   await p.locator('input[type=password]').fill('Falcon#Rise26');
   await p.keyboard.press('Enter');
   await p.getByText('The password was written on a note anyone could read').click({ timeout: 10000 });
-  await p.getByText('Case closed').waitFor({ timeout: 10000 });
+  await p.locator('.debrief').waitFor({ timeout: 10000 });
   await p.waitForTimeout(1200);
   await shot(p, '05-l01-debrief');
 });
@@ -118,7 +118,7 @@ await step('L02 terminal navigation + answers', async () => {
   await p.waitForTimeout(400);
   await p.locator('.answer input').first().fill('03:12');
   await p.locator('.answer input').first().press('Enter');
-  await p.getByText('Case closed').waitFor({ timeout: 10000 });
+  await p.locator('.debrief').waitFor({ timeout: 10000 });
 });
 
 await step('L04 grep trap feedback', async () => {
@@ -148,7 +148,7 @@ await step('evidence board', async () => {
 await step('L06 mail headers', async () => {
   await p.goto(`${BASE}/?level=L06`);
   await startCase(p);
-  await p.getByText('ACTION REQUIRED').first().click({ timeout: 30000 });
+  await p.locator('.mail-list').getByText('ACTION REQUIRED').first().click({ timeout: 30000 });
   await p.getByRole('button', { name: 'Show original' }).click();
   await p.locator('.mail-raw').getByText('Return-Path').waitFor({ timeout: 5000 });
   await p.waitForTimeout(500);
@@ -160,7 +160,7 @@ await step('L06 mail headers', async () => {
     await p.waitForTimeout(400);
   }
   await p.getByText('The From header is just text').click({ timeout: 10000 });
-  await p.getByText('Case closed').waitFor({ timeout: 10000 });
+  await p.locator('.debrief').waitFor({ timeout: 10000 });
 });
 
 await step('L10 proxy log hunt', async () => {
@@ -179,7 +179,7 @@ await step('L10 proxy log hunt', async () => {
     await p.waitForTimeout(400);
   }
   await p.getByText('Reset both passwords').click({ timeout: 10000 });
-  await p.getByText('Case closed').waitFor({ timeout: 10000 });
+  await p.locator('.debrief').waitFor({ timeout: 10000 });
 });
 
 await step('L11 base64 decode', async () => {
@@ -198,7 +198,7 @@ await step('L11 base64 decode', async () => {
     await p.waitForTimeout(400);
   }
   await p.getByText('base64 is reversible by anyone').click({ timeout: 10000 });
-  await p.getByText('Case closed').waitFor({ timeout: 10000 });
+  await p.locator('.debrief').waitFor({ timeout: 10000 });
 });
 
 // The desktop flows are done: park that page so its render loop stops competing for the CPU.
@@ -257,7 +257,7 @@ await step('mobile screens', async () => {
   await shot(m, '15-m-board');
   await m.goto(`${BASE}/?level=L07&quality=low`);
   await startCase(m);
-  await m.getByText('Your March payslip').first().click({ timeout: 30000 });
+  await m.locator('.mail-list').getByText('Your March payslip').first().click({ timeout: 30000 });
   await m.getByText('View your payslip').click();
   await m.getByText('verify-session.example/payroll').waitFor({ timeout: 5000 });
   await shot(m, '18-m-mail');

@@ -1,0 +1,345 @@
+/* The Guide (corner button + panel), the mission block and the Case File layout. */
+.echo-dock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+.guide-fab {
+  pointer-events: auto;
+  margin-top: -16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 6px 16px 6px 12px;
+  border: 1px solid var(--cyan);
+  border-radius: 999px;
+  background: rgba(6, 14, 26, 0.94);
+  color: #bff7ff;
+  font-family: var(--font-ui);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 0 18px -6px var(--cyan);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.guide-fab:hover,
+.guide-fab.on {
+  background: rgba(0, 229, 255, 0.2);
+  box-shadow: 0 0 22px -4px var(--cyan);
+}
+.guide-fab-mark {
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--cyan);
+  color: #04131a;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+}
+.guide-panel {
+  position: absolute;
+  z-index: 2850;
+  bottom: 62px;
+  inset-inline-end: 150px;
+  width: min(440px, calc(100vw - 174px));
+  max-height: min(74vh, 660px);
+  display: flex;
+  flex-direction: column;
+  background: rgba(8, 12, 22, 0.97);
+  border-color: rgba(0, 229, 255, 0.45);
+  box-shadow: 0 24px 70px -18px rgba(0, 0, 0, 0.9), 0 0 30px -14px var(--cyan);
+}
+.guide-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+.guide-title {
+  flex: 1;
+  font-weight: 700;
+  font-size: 18px;
+}
+.guide-close {
+  width: 40px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  font-size: 20px;
+  cursor: pointer;
+}
+.guide-close:hover {
+  background: var(--red);
+}
+.guide-body {
+  overflow-y: auto;
+  padding: 12px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.guide-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.guide-now {
+  margin: 2px 0 8px;
+  color: var(--dim);
+  font-size: 15px;
+}
+.tier {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-inline-start: 3px solid var(--cyan);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.tier.clue {
+  border-inline-start-color: var(--amber);
+}
+.tier.solution {
+  border-inline-start-color: var(--magenta);
+}
+.tier.open {
+  background: rgba(0, 229, 255, 0.05);
+}
+.tier-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.tier-name {
+  font-weight: 700;
+}
+.tier-n {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-inline-end: 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+  color: var(--dim);
+}
+.tier-info {
+  margin: 4px 0 0;
+  color: var(--dim);
+  font-size: 14.5px;
+}
+.tier-text {
+  margin: 8px 0 0;
+}
+.tier-confirm {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 200, 87, 0.55);
+  border-radius: 8px;
+  background: rgba(255, 200, 87, 0.07);
+}
+.tier-confirm p {
+  margin: 0 0 10px;
+}
+.tier-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tier-actions .btn {
+  min-height: 38px;
+}
+.steps {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.steps li.done {
+  color: var(--dim);
+}
+.step-n {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--magenta);
+}
+.idea {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+.idea p {
+  margin: 0;
+}
+
+/* --- mission block: shared by the Case File and the Guide --- */
+.mission h4,
+.guide-body h4 {
+  margin: 0 0 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cyan);
+}
+.mission h4:not(:first-child) {
+  margin-top: 10px;
+}
+.mission p,
+.mission ul {
+  margin: 0;
+}
+.mission ul {
+  padding-inline-start: 20px;
+}
+.mission li {
+  margin-top: 3px;
+}
+.mission-goal {
+  font-size: 1.06em;
+  font-weight: 600;
+}
+.briefing-goal {
+  margin: 0;
+  padding: 8px 12px;
+  border-inline-start: 3px solid var(--cyan);
+  border-radius: 6px;
+  background: rgba(0, 229, 255, 0.07);
+  font-weight: 600;
+}
+.ghost-taunt {
+  padding: 10px 12px;
+  border: 1px dashed rgba(255, 77, 109, 0.55);
+  border-radius: 8px;
+  background: rgba(255, 77, 109, 0.06);
+  color: #ffc9d3;
+  font-style: italic;
+}
+.ghost-taunt .label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--red);
+  font-style: normal;
+}
+
+/* --- case file --- */
+.case .mission {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(0, 229, 255, 0.04);
+}
+.story {
+  margin-top: 10px;
+  border-top: 1px dashed var(--line);
+  padding-top: 8px;
+}
+.story summary {
+  cursor: pointer;
+  color: var(--dim);
+  font-weight: 600;
+}
+.case-row,
+.case-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.case-foot {
+  border-top: 1px dashed var(--line);
+  padding-top: 14px;
+}
+.nexus .objective.locked {
+  opacity: 0.58;
+}
+.nexus .objective-mark {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 12px;
+}
+.nexus .choices {
+  flex-direction: column;
+}
+.choice {
+  justify-content: flex-start;
+  text-align: start;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+.answer-input {
+  font-family: var(--font-mono);
+  min-height: 44px;
+}
+.answer-input:placeholder-shown {
+  font-family: var(--font-ui);
+}
+.answer .btn {
+  min-height: 44px;
+}
+
+@media (max-width: 760px) {
+  .guide-panel {
+    inset-inline: 8px;
+    bottom: 58px;
+    width: auto;
+    max-height: 80vh;
+  }
+  .guide-fab {
+    margin-top: -14px;
+    min-height: 40px;
+  }
+  /* Finger-sized window and taskbar controls. */
+  .nexus .os-controls button {
+    width: 44px;
+    height: 36px;
+    font-size: 18px;
+  }
+  .nexus .os-titlebar {
+    height: 46px;
+  }
+  .nexus .task-btn {
+    min-width: 44px;
+    min-height: 42px;
+    justify-content: center;
+  }
+  .nexus .exit {
+    min-width: 44px;
+    min-height: 42px;
+  }
+  /* Room at the end of the Case File so ECHO never covers the last button. */
+  .nexus .case {
+    padding-bottom: 150px;
+  }
+  /* The corner belongs to Byte: it sits on the left in an Arabic page. */
+  [dir='rtl'] .procs-detail {
+    padding-right: 12px;
+    padding-left: 92px;
+  }
+}
+
+/* Wide screens: the Guide opens beside the docked Case File, so the question stays visible. */
+@media (min-width: 1100px) {
+  .guide-panel {
+    inset-inline-end: calc(clamp(380px, 30vw, 460px) + 28px);
+  }
+}

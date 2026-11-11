@@ -1,0 +1,113 @@
+/* Reading comfort, Arabic typography and the language switch. Loaded after global.css. */
+.btn {
+  font-family: var(--font-ui);
+}
+.label {
+  font-size: 12px;
+}
+/* Commands, paths and values inside a sentence (see ui/Rich.tsx). */
+.inline-code {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(0, 229, 255, 0.09);
+  color: #bff7ff;
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+[dir='rtl'] body {
+  line-height: 1.75;
+}
+/* Arabic letters join: letter-spacing and uppercase tracking break the words apart. */
+[dir='rtl'] .label,
+[dir='rtl'] .btn,
+[dir='rtl'] .os-title,
+[dir='rtl'] .tagline,
+[dir='rtl'] h1,
+[dir='rtl'] h2,
+[dir='rtl'] h3,
+[dir='rtl'] h4 {
+  letter-spacing: 0;
+}
+[dir='rtl'] .label {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+}
+[dir='rtl'] .small,
+[dir='rtl'] .node-skill,
+[dir='rtl'] .debrief-source,
+[dir='rtl'] .lock-hint,
+[dir='rtl'] .cost {
+  font-size: 14.5px;
+}
+/* Tool windows stay left-to-right, but their buttons and notices use the reading font. */
+.ltr .btn,
+.ltr .hidden-toggle,
+.ltr .dim,
+.ltr .mail-folders button,
+.ltr .mail-status,
+.ltr .label,
+.ltr th {
+  font-family: var(--font-ui);
+}
+/* A little air for long reading blocks. */
+.debrief p,
+.briefing-text,
+.guide-body p,
+.guide-body li {
+  line-height: 1.6;
+}
+[dir='rtl'] .debrief p,
+[dir='rtl'] .briefing-text,
+[dir='rtl'] .guide-body p,
+[dir='rtl'] .guide-body li {
+  line-height: 1.8;
+}
+
+/* --- language switch --- */
+.lang-switch {
+  display: inline-flex;
+  flex-shrink: 0;
+  direction: ltr;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.lang-switch button {
+  min-width: 44px;
+  min-height: 34px;
+  padding: 4px 10px;
+  border: 0;
+  background: transparent;
+  font-family: 'Noto Sans Arabic', var(--font-ui);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.lang-switch button.active {
+  background: rgba(0, 229, 255, 0.22);
+  color: #bff7ff;
+}
+.login-lang {
+  align-self: center;
+}
+
+/* --- hub: locked cases stay readable (the lock icon already says "not yet") --- */
+.hub .level-node.locked,
+.hub .level-node.soon {
+  opacity: 0.66;
+  filter: grayscale(0.5);
+}
+.hub .node-skill {
+  font-size: 14px;
+}
+.hub-callsign {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -151,7 +151,35 @@ const level: LevelConfig = {
   },
   briefing: {
     en: `FINAL CASE. The report on HELIX-0313 goes to the board, to legal and to the police tonight, and every line in it must be proven. Two jobs. First, the cleanup team says "Status: CLEAN": check it on the machines and on the quarantined ${ACT6.finHost}. Second, fill in the attribution: who is gh0st? The draft is in ${REPORT}. Every blank is something you already found somewhere in this case. Nothing here will tell you the name; your memory and your board will.`,
-    ar: `القضية الأخيرة. تقرير HELIX-0313 رايح الليلة لمجلس الإدارة وللقانونية وللشرطة، وكل سطر فيه لازم يكون مثبت. عندك شغلتين. الأولى: فريق التنظيف بيحكي "Status: CLEAN"، تأكد من هالحكي عالأجهزة وعلى ${ACT6.finHost} المعزول. الثانية: عبّي جزء تحديد الفاعل: مين هو gh0st؟ المسودة موجودة بـ ‎${REPORT}. كل فراغ فيها هو إشي لقيته قبل بمكان ما بهالقضية. ولا إشي هون رح يحكيلك الاسم؛ ذاكرتك ولوح الأدلة هم اللي رح يحكوا.`,
+    ar: 'القضية الأخيرة. تقرير الحادثة HELIX-0313 يذهب الليلة إلى مجلس الإدارة والشؤون القانونية والشرطة، وكل سطر فيه يجب أن يكون مثبتاً. أمامك عملان. الأول: فريق التنظيف يقول `Status: CLEAN`، فتحقق من ذلك على الأجهزة وعلى الجهاز المعزول `HELIX-FIN03`. الثاني: أكمل قسم تحديد الفاعل: من هو gh0st؟ المسودة موجودة في المجلد `/home/a.nasser/ir/report`. كل فراغ فيها شيء وجدته من قبل في مكان ما من هذه القضية. لا شيء هنا سيخبرك بالاسم: ذاكرتك ولوحة الأدلة هما اللتان ستخبرانك.',
+  },
+  mission: {
+    goal: {
+      en: 'Check that the cleanup is really complete, then fill in the incident report and name the person behind gh0st.',
+      ar: 'تحقق أن التنظيف اكتمل فعلاً، ثم أكمل تقرير الحادثة وحدّد الشخص الذي يقف وراء gh0st.',
+    },
+    investigate: [
+      {
+        en: 'The file `eradicate/cleanup-report.txt`, compared with the snapshots in `/home/a.nasser/evidence/after`.',
+        ar: 'الملف `eradicate/cleanup-report.txt`، بمقارنته بنسخ الأجهزة في `/home/a.nasser/evidence/after`.',
+      },
+      {
+        en: 'The Processes and Registry apps for the finance computer: every `svchost.exe`, and the `Run` keys.',
+        ar: 'تطبيقا العمليات والسجل (Registry) لجهاز المالية: كل عملية `svchost.exe`، ومفاتيح `Run`.',
+      },
+      {
+        en: 'The folder `report`: the draft, the staff list, the contract and the vendor session log.',
+        ar: 'المجلد `report`: مسودة التقرير، وقائمة الموظفين، والعقد، وسجل جلسات المورّد.',
+      },
+      {
+        en: "Your Evidence Board and your memory: the clues about gh0st's identity come from earlier cases.",
+        ar: 'لوحة الأدلة وذاكرتك: الأدلة على هوية gh0st تأتي من القضايا السابقة.',
+      },
+    ],
+    success: {
+      en: 'Every blank in the report is filled: the leftover file, the finance computer check, the kit signature, the name, the date, the detection rule and the fix.',
+      ar: 'كل فراغ في التقرير مملوء: الملف المتبقي، وفحص جهاز المالية، وتوقيع ملف التصيّد، والاسم، والتاريخ، وقاعدة الكشف، والإصلاح.',
+    },
   },
   apps: ['case', 'terminal', 'files', 'processes', 'registry', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -169,28 +197,28 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'left',
-      prompt: { en: 'One foothold from your board survived the cleanup. Which file? (its path on the host)', ar: 'في أثر من اللي عاللوح نجي من التنظيف. أي ملف؟ (مساره عالجهاز)' },
+      prompt: { en: 'The cleanup missed one thing the attacker left behind. Which file is it? (write its path on the server)', ar: 'التنظيف أغفل أثراً واحداً تركه المهاجم. أي ملف هو؟ (اكتب مساره على الخادم)' },
       placeholder: '/path',
       validator: { kind: 'answer', accept: [ACT6.crontab, `${ACT6.dbHost}:${ACT6.crontab}`, `${DB}${ACT6.crontab}`] },
-      wrong: { en: `Put every foothold on your board next to cleanup-report.txt, then look for the missing one in ${AFTER}.`, ar: `حط كل أثر عاللوح جنب cleanup-report.txt، وبعدين دوّر عالناقص بـ ‎${AFTER}.` },
+      wrong: { en: 'Put every foothold on your board next to `cleanup-report.txt`, then look for the missing one in `/home/a.nasser/evidence/after`.', ar: 'قارن كل أثر على لوحة الأدلة بالملف `cleanup-report.txt`، ثم ابحث عن الأثر الناقص في `/home/a.nasser/evidence/after`.' },
     },
     {
       id: 'plan',
-      prompt: { en: 'His note planned "sync.exe as svchost, logon" on FIN03. Did it happen?', ar: 'ملاحظته خطّطت لـ "sync.exe as svchost, logon" على FIN03. صار هالإشي؟' },
+      prompt: { en: 'His note planned `sync.exe as svchost, logon` on FIN03. Did it happen? (use the Processes and Registry apps)', ar: 'ملاحظته خطّطت لتنفيذ `sync.exe as svchost, logon` على الجهاز FIN03. هل حدث ذلك؟ (استخدم تطبيقَي العمليات والسجل)' },
       validator: {
         kind: 'choice',
         correct: 'never',
         options: [
-          { id: 'yes', label: { en: 'Yes: there is an extra svchost.exe from a user folder, with a Run entry', ar: 'آه: في svchost.exe زيادة من مجلد مستخدم، وإله مدخل بـ Run' } },
-          { id: 'never', label: { en: 'No: every svchost.exe runs from System32 under services.exe, and the Run keys hold only the usual programs', ar: 'لأ: كل svchost.exe شغّال من System32 تحت services.exe، ومفاتيح Run فيها بس البرامج العادية' } },
-          { id: 'unknown', label: { en: 'We cannot tell while the machine is in quarantine', ar: 'ما منقدر نعرف والجهاز معزول' } },
+          { id: 'yes', label: { en: 'Yes: there is an extra svchost.exe from a user folder, with a Run entry', ar: 'نعم: توجد عملية `svchost.exe` زائدة تعمل من مجلد مستخدم، ولها مدخل في `Run`' } },
+          { id: 'never', label: { en: 'No: every svchost.exe runs from System32 under services.exe, and the Run keys hold only the usual programs', ar: 'لا: كل عملية `svchost.exe` تعمل من System32 تحت `services.exe`، ومفاتيح `Run` فيها البرامج المعتادة فقط' } },
+          { id: 'unknown', label: { en: 'We cannot tell while the machine is in quarantine', ar: 'لا يمكن معرفة ذلك والجهاز معزول' } },
         ],
       },
-      wrong: { en: 'Processes, tree view: what is the parent and the path of each svchost.exe? Then Registry: the Run and RunOnce keys.', ar: 'بـ Processes افتح عرض الشجرة: مين أبو كل svchost.exe وشو مساره؟ وبعدين بـ Registry: مفاتيح Run و RunOnce.' },
+      wrong: { en: 'In Processes, use the tree view: what is the parent and the path of each `svchost.exe`? Then in Registry, read the `Run` and `RunOnce` keys.', ar: 'في تطبيق العمليات افتح عرض الشجرة: ما العملية الأم وما مسار كل عملية `svchost.exe`؟ ثم في تطبيق السجل اقرأ مفاتيح `Run` و`RunOnce`.' },
       grants: [
         {
           id: 'ev.l27.sweep',
-          title: { en: 'Cleanup gap found; FIN03 never reached', ar: 'ثغرة بالتنظيف انكشفت؛ و FIN03 ما انوصل' },
+          title: { en: 'Cleanup gap found; FIN03 never reached', ar: 'كُشف نقص في التنظيف، والجهاز FIN03 لم يُمسّ' },
           type: 'artifact',
           content: `${ACT6.dbHost}:${ACT6.crontab} still held "${ACT6.cronLine}" after "Status: CLEAN" (now removed); ${ACT6.finHost} processes and Run keys clean`,
           links: ['ev.l19.cron', 'ev.l26.contained', 'ev.l24.next'],
@@ -199,60 +227,60 @@ const level: LevelConfig = {
     },
     {
       id: 'initials',
-      prompt: { en: 'The report asks for the signature he left in the phishing kit, back in Act 2. What did it say?', ar: 'التقرير بيطلب التوقيع اللي تركه بحزمة التصيّد، من أيام الفصل الثاني. شو كان مكتوب؟' },
+      prompt: { en: 'The report asks for the signature he left in the phishing kit, back in Act 2 (case 08). What did it say?', ar: 'التقرير يطلب التوقيع الذي تركه في ملف التصيّد في الفصل الثاني (القضية 08). ماذا كان مكتوباً فيه؟' },
       placeholder: '...',
       validator: { kind: 'answer', accept: ['ops: km', 'ops:km', 'km', 'kit v2.3 | ops: km', '<!-- kit v2.3 | ops: km -->'] },
       derived: 'Memory test: L08 shows the HTML comment "<!-- kit v2.3 | ops: km -->" in the fake attachment and its intel says to keep it in mind. It is not repeated anywhere in L27.',
-      wrong: { en: 'It was a short comment hidden in the code of the fake attachment. Think back.', ar: 'كان تعليق قصير مخبّى بكود المرفق المزيّف. ارجع بذاكرتك.' },
+      wrong: { en: 'It was a short comment hidden in the code of the fake attachment. Think back.', ar: 'كان تعليقاً قصيراً مخفياً في شيفرة المرفق المزيّف. حاول أن تتذكّر.' },
     },
     {
       id: 'who',
-      prompt: { en: 'Who is gh0st? (full name)', ar: 'مين هو gh0st؟ (الاسم الكامل)' },
+      prompt: { en: 'Who is gh0st? (full name)', ar: 'من هو gh0st؟ (الاسم الكامل بالأحرف الإنجليزية)' },
       placeholder: 'First Last',
       validator: { kind: 'answer', accept: ['Kade Mercer', 'Mercer Kade', 'Mercer, Kade'] },
       wrong: {
         en: 'Initials alone point at more than one person. Which other clues on your board name someone, and which office do they place him in?',
-        ar: 'الحروف الأولى لحالها بتأشّر على أكثر من شخص. شو الأدلة الثانية اللي عاللوح فيها اسم، وبأي مكتب بتحطه؟',
+        ar: 'الحرفان الأولان وحدهما يشيران إلى أكثر من شخص. ما الأدلة الأخرى على اللوحة التي فيها اسم؟ وفي أي مكتب تضعه؟',
       },
     },
     {
       id: 'first',
-      prompt: { en: 'On which date did the vendor account first open a session outside the contract window? (YYYY-MM-DD)', ar: 'بأي تاريخ حساب المورّد فتح أول جلسة برّا الوقت المسموح بالعقد؟ (YYYY-MM-DD)' },
+      prompt: { en: 'On which date did the vendor account `nova-svc` first open a session outside the contract window? (YYYY-MM-DD)', ar: 'في أي تاريخ فتح حساب المورّد `nova-svc` أول جلسة خارج الوقت المسموح في العقد؟ (بصيغة YYYY-MM-DD)' },
       placeholder: '2026-03-..',
       validator: { kind: 'answer', accept: ['2026-03-11', '11-03-2026', '11/03/2026', '2026/03/11', 'March 11', 'Mar 11', '11 March', '11 Mar'] },
-      wrong: { en: 'The contract allows one short window a week. Check every session of that account against it, in order.', ar: 'العقد بيسمح بوقت قصير واحد بالأسبوع. قارن كل جلسة لهالحساب معه، بالترتيب.' },
+      wrong: { en: 'The contract allows one short window a week. Check every session of that account against it, in order.', ar: 'العقد يسمح بفترة قصيرة واحدة في الأسبوع. قارن بها كل جلسة لهذا الحساب، بالترتيب.' },
     },
     {
       id: 'rule',
-      prompt: { en: 'Detection: which rule would have warned us first, before the phishing even started?', ar: 'الكشف: أي قاعدة كانت رح تنبّهنا أول، حتى قبل ما يبلّش التصيّد؟' },
+      prompt: { en: 'Detection: which rule would have warned us first, before the phishing even started?', ar: 'الكشف: أي قاعدة كانت ستنبّهنا أولاً، حتى قبل أن يبدأ التصيّد؟' },
       validator: {
         kind: 'choice',
         correct: 'window',
         options: [
           { id: 'fails', label: { en: 'Alert after 5 failed logins on one account', ar: 'تنبيه بعد 5 محاولات دخول فاشلة على حساب واحد' } },
-          { id: 'window', label: { en: `Alert when ${ACT6.vendorAccount} starts a session outside ${ACT6.window}`, ar: `تنبيه لما ${ACT6.vendorAccount} يفتح جلسة برّا ${ACT6.window}` } },
-          { id: 'ip', label: { en: `Alert on any login from ${ACT6.attackerIp}`, ar: `تنبيه على أي دخول من ${ACT6.attackerIp}` } },
+          { id: 'window', label: { en: `Alert when ${ACT6.vendorAccount} starts a session outside ${ACT6.window}`, ar: 'تنبيه عندما يفتح الحساب `nova-svc` جلسة خارج الوقت المسموح في العقد (أيام الأحد من 01:00 إلى 03:00 بتوقيت UTC)' } },
+          { id: 'ip', label: { en: `Alert on any login from ${ACT6.attackerIp}`, ar: 'تنبيه عند أي دخول من العنوان `203.0.113.77`' } },
         ],
       },
-      wrong: { en: 'His vendor sessions never failed, and nobody knew his attack address until Mar 13. What did his behaviour break that we already knew?', ar: 'جلساته كمورّد عمرها ما فشلت، وما حدا كان بيعرف عنوان هجومه قبل 13 آذار. شو القاعدة اللي منعرفها من قبل وهو كسرها بتصرفاته؟' },
+      wrong: { en: 'His vendor sessions never failed, and nobody knew his attack address until Mar 13. What did his behaviour break that we already knew?', ar: 'جلساته باسم المورّد لم تفشل أبداً، ولم يكن أحد يعرف عنوان هجومه قبل 13 آذار. ما القاعدة المعروفة مسبقاً التي خالفها سلوكه؟' },
     },
     {
       id: 'fix',
-      prompt: { en: 'Root cause fix: which recommendation closes the door he really used?', ar: 'إصلاح السبب الأساسي: أي توصية بتسكّر الباب اللي فات منه فعلاً؟' },
+      prompt: { en: 'Root cause fix: which recommendation closes the door he really used?', ar: 'إصلاح السبب الأساسي: أي توصية تغلق الباب الذي دخل منه فعلاً؟' },
       validator: {
         kind: 'choice',
         correct: 'named',
         options: [
-          { id: 'block', label: { en: `Block ${ACT6.attackerIp} forever`, ar: `احظر ${ACT6.attackerIp} للأبد` } },
-          { id: 'named', label: { en: 'One named account with MFA per vendor engineer, open only in the contract window, alert outside it', ar: 'حساب باسم كل مهندس عند المورّد مع تحقق ثنائي، بيفتح بس بالوقت اللي بالعقد، وتنبيه برّاه' } },
-          { id: 'novendor', label: { en: 'Stop working with outside vendors', ar: 'وقّف الشغل مع أي مورّد خارجي' } },
+          { id: 'block', label: { en: `Block ${ACT6.attackerIp} forever`, ar: 'حظر العنوان `203.0.113.77` إلى الأبد' } },
+          { id: 'named', label: { en: 'One named account with MFA per vendor engineer, open only in the contract window, alert outside it', ar: 'حساب باسم كل مهندس عند المورّد مع التحقق بخطوتين، يعمل فقط في الوقت المحدد في العقد، مع تنبيه خارجه' } },
+          { id: 'novendor', label: { en: 'Stop working with outside vendors', ar: 'إيقاف العمل مع أي مورّد خارجي' } },
         ],
       },
-      wrong: { en: 'An address can change in a minute. What made it impossible to tell which engineer was behind the vendor sessions?', ar: 'العنوان بيتغيّر بدقيقة. شو اللي خلّى مستحيل نعرف أي مهندس كان ورا جلسات المورّد؟' },
+      wrong: { en: 'An address can change in a minute. What made it impossible to tell which engineer was behind the vendor sessions?', ar: 'العنوان يتغيّر في دقيقة. ما الذي جعل معرفة المهندس الذي كان وراء جلسات المورّد مستحيلة؟' },
       grants: [
         {
           id: 'ev.l27.unmasked',
-          title: { en: 'gh0st unmasked: Kade Mercer', ar: 'انكشف القناع: gh0st هو Kade Mercer' },
+          title: { en: 'gh0st unmasked: Kade Mercer', ar: 'سقط القناع: gh0st هو Kade Mercer' },
           type: 'person',
           content: `gh0st = Kade Mercer, NovaBackup field engineer (contract ${ACT6.contract}): "ops: km" in the kit, ${ACT6.portalAdmin} on the portal, Artist kmercer on the photo from the main office, ${ACT6.vendorAccount} outside the window from ${ACT6.firstOutside}`,
           links: ['ev.l08.kit', 'ev.l15.vendor', 'ev.l23.artist', 'ev.l23.place', 'ev.l26.contained'],
@@ -260,49 +288,74 @@ const level: LevelConfig = {
       ],
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: 'Every blank in the draft is something you already found. Start in eradicate/, then read everything in report/.', ar: 'كل فراغ بالمسودة هو إشي لقيته قبل. ابدأ من مجلد eradicate، وبعدين اقرأ كل إشي بمجلد report.' }, cost: 50 },
-    {
-      tier: 'direction',
-      text: {
-        en: 'The cleanup list was written from a summary made before one foothold was found. For the name: several people share the kit\'s initials, and your board holds a username seen twice, on the portal and inside the photo.',
-        ar: 'قائمة التنظيف انكتبت من ملخص قبل ما ينكشف أثر من الآثار. وللاسم: في أكثر من شخص إلهم نفس حروف الحزمة، واللوح فيه اسم مستخدم بيّن مرتين، عالبوابة وجوّا الصورة.',
-      },
-      cost: 90,
+  guide: {
+    nudge: {
+      en: 'Every blank in the draft is something you already found. Start in `eradicate`, then read everything in `report`.',
+      ar: 'كل فراغ في المسودة شيء وجدته من قبل. ابدأ من المجلد `eradicate`، ثم اقرأ كل ما في المجلد `report`.',
     },
-    {
-      tier: 'near-solution',
-      text: {
-        en: 'Check every crontab in the snapshots. A username is often the first initial plus the surname: try it on each name in the staff list, then confirm with the office. For the date, mark the Sundays in the contract and read the sessions log line by line.',
-        ar: 'افحص كل crontab بالنسخ. اسم المستخدم كثير بيكون أول حرف من الاسم مع اسم العيلة: جرّبه على كل اسم بقائمة الموظفين، وتأكد من المكتب. وللتاريخ، علّم أيام الأحد اللي بالعقد واقرأ سجل الجلسات سطر سطر.',
-      },
-      cost: 130,
+    clue: {
+      en: "The cleanup list was written from a summary made before one of the attacker's footholds was found. For the name: several people share the kit's initials, and your board holds a username seen twice, on the portal and inside the photo.",
+      ar: 'قائمة التنظيف كُتبت اعتماداً على ملخص سبق اكتشاف أحد آثار المهاجم. وأما الاسم: فأكثر من شخص له الحرفان نفساهما اللذان في ملف التصيّد، وعلى لوحة الأدلة اسم مستخدم ظهر مرتين: في البوابة وداخل الصورة.',
     },
-  ],
+    steps: {
+      left: {
+        en: 'Run `cat eradicate/cleanup-report.txt`, then `find /home/a.nasser/evidence/after -type f`. The report never mentions the crontab found in case 19, and the snapshot of helix-db01 still has it. Type `/var/spool/cron/crontabs/j.ortiz`.',
+        ar: 'شغّل `cat eradicate/cleanup-report.txt` ثم `find /home/a.nasser/evidence/after -type f`. التقرير لا يذكر ملف المهام الذي وجدته في القضية 19، وهو ما زال موجوداً في نسخة الخادم helix-db01. اكتب `/var/spool/cron/crontabs/j.ortiz`.',
+      },
+      plan: {
+        en: 'Open Processes and switch to Tree. Every `svchost.exe` runs from `C:\\Windows\\System32` under `services.exe`. In Registry, the `Run` keys hold only SecurityHealth, OneDrive and Teams. Choose the answer that starts with "No".',
+        ar: 'افتح تطبيق العمليات واختر عرض الشجرة. كل عملية `svchost.exe` تعمل من `C:\\Windows\\System32` تحت `services.exe`. وفي تطبيق السجل، مفاتيح `Run` فيها فقط SecurityHealth و OneDrive و Teams. اختر الجواب الذي يبدأ بكلمة «لا».',
+      },
+      initials: {
+        en: 'This answer is not inside this case. It is the short comment on line 2 of the fake attachment in case 08, "Special Delivery", and the intel you saved there repeats it. If you forgot it, replay case 08 and run `cat VPN-Certificate-Renewal.pdf`.',
+        ar: 'هذا الجواب غير موجود في هذه القضية. إنه التعليق القصير في السطر الثاني من المرفق المزيّف في القضية 08، والمعلومة التي حفظتها هناك تذكره. إن نسيته، أعد لعب القضية 08 وشغّل `cat VPN-Certificate-Renewal.pdf`.',
+      },
+      who: {
+        en: 'Your board shows the same username twice: the portal account in case 15 and the `Artist` of the photo in case 23. It is a first initial plus a surname. Run `cat report/novabackup-staff-V-2207.csv`: only one person fits that username AND works in the main office, where the photo was taken. Type that full name.',
+        ar: 'على لوحة الأدلة اسم مستخدم ظهر مرتين: حساب البوابة في القضية 15 والحقل `Artist` في صورة القضية 23. هذا الاسم مكوَّن من الحرف الأول ثم اسم العائلة. شغّل `cat report/novabackup-staff-V-2207.csv`: شخص واحد فقط يوافق اسم المستخدم ويعمل في المكتب الرئيسي الذي التُقطت فيه الصورة. اكتب اسمه الكامل.',
+      },
+      first: {
+        en: 'Run `cat report/contract-V-2207.txt`: `nova-svc` is allowed only on Sundays, 01:00 to 03:00 UTC, and the Sundays in March are 1, 8, 15, 22 and 29. Run `grep nova-svc report/vendor-gw-sessions.log`: the first session on another day is on `2026-03-11`.',
+        ar: 'شغّل `cat report/contract-V-2207.txt`: الحساب `nova-svc` مسموح له أيام الأحد فقط، من 01:00 إلى 03:00 بتوقيت UTC، وأيام الأحد في آذار هي 1 و 8 و 15 و 22 و 29. ثم شغّل `grep nova-svc report/vendor-gw-sessions.log`: أول جلسة في يوم آخر كانت في `2026-03-11`.',
+      },
+      rule: {
+        en: 'Choose the alert on `nova-svc` sessions outside the contract window. It would have fired on Mar 11, two days before the attack. His logins never failed, and nobody knew his attack address yet.',
+        ar: 'اختر التنبيه عند فتح الحساب `nova-svc` جلسة خارج الوقت المسموح في العقد. كان هذا التنبيه سيعمل في 11 آذار، قبل الهجوم بيومين. محاولات دخوله لم تفشل أبداً، ولم يكن أحد يعرف عنوان هجومه بعد.',
+      },
+      fix: {
+        en: 'Choose "One named account with MFA per vendor engineer, open only in the contract window, alert outside it". The shared account made it impossible to tell which engineer was working.',
+        ar: 'اختر الجواب الذي يعطي كل مهندس عند المورّد حساباً باسمه مع التحقق بخطوتين، يعمل فقط في الوقت المحدد في العقد. الحساب المشترك جعل معرفة المهندس الذي يعمل مستحيلة.',
+      },
+    },
+    concept: {
+      en: "Naming an attacker is a claim, so it needs several independent clues that point the same way. One clue, such as two initials, fits several people. Together, the clues fit one person. Detect behaviour that breaks rules you already know, because an attacker's address is unknown until it is too late.",
+      ar: 'تحديد المهاجم ادعاء، ولذلك يحتاج إلى عدة أدلة مستقلة تشير إلى الاتجاه نفسه. دليل واحد، مثل حرفين، ينطبق على عدة أشخاص، أما الأدلة مجتمعة فتنطبق على شخص واحد. واكشف السلوك الذي يخالف قواعد تعرفها مسبقاً، لأن عنوان المهاجم يبقى مجهولاً إلى أن يفوت الأوان.',
+    },
+  },
   rewards: { points: 500, achievement: 'game-clear' },
   debrief: {
     concept: {
       en: 'The incident report is where an investigation becomes useful: a summary, a timeline, what was taken, how it was cleaned up, who did it and what must change. Attribution is a claim like any other, so it needs several independent pieces of evidence that point the same way: here a kit signature, a portal account, a camera\'s author field, a photo location and a vendor account used outside its window. One clue (two initials) fits three people; together they fit one. Write the confidence and the sources next to the claim, then hand it to legal and the police: defenders find and prove, they never "hack back". The lessons go into prevention and detection: give every vendor engineer a named account with MFA and a time window, and alert on behaviour that breaks the rules you already know, because an attacker\'s address is unknown until it is too late, while his behaviour shows from the first day.',
-      ar: 'تقرير الحادثة هو المكان اللي التحقيق بيصير فيه مفيد: ملخص، وخط زمني، وشو انسرق، وكيف تنظّف، ومين عملها، وشو لازم يتغيّر. وتحديد الفاعل ادعاء زي أي ادعاء، فلازمه كذا دليل مستقل بيأشّروا على نفس الاتجاه: هون توقيع بحزمة التصيّد، وحساب عالبوابة، وحقل صاحب الكاميرا، ومكان الصورة، وحساب مورّد انستخدم برّا وقته. دليل واحد (حرفين) بيركب على ثلاث أشخاص؛ ومع بعض بيركبوا على واحد بس. اكتب درجة الثقة والمصادر جنب الادعاء، وسلّمه للقانونية والشرطة: المدافعين بيكشفوا وبيثبتوا، وعمرهم ما بيردّوا بالاختراق. والدروس بتروح عالوقاية والكشف: اعطِ كل مهندس عند المورّد حساب باسمه مع تحقق ثنائي ووقت محدد، ونبّه على أي تصرف بيكسر القواعد اللي بتعرفها، لأن عنوان المهاجم ما بتعرفه إلا لما يكون فات الأوان، بس تصرفاته بتبيّن من أول يوم.',
+      ar: 'تقرير الحادثة هو المكان الذي يصبح فيه التحقيق مفيداً: ملخص، وخط زمني، وما الذي أُخذ، وكيف جرى التنظيف، ومن فعل ذلك، وما الذي يجب أن يتغيّر. تحديد الفاعل ادعاء كأي ادعاء، فيحتاج إلى عدة أدلة مستقلة تشير إلى الاتجاه نفسه: هنا توقيع في ملف التصيّد، وحساب في البوابة، وحقل المالك في الكاميرا، ومكان الصورة، وحساب مورّد استُخدم خارج وقته. دليل واحد (حرفان) ينطبق على ثلاثة أشخاص، والأدلة مجتمعة تنطبق على شخص واحد. اكتب درجة الثقة والمصادر بجانب الادعاء، ثم سلّمه للشؤون القانونية والشرطة: المدافعون يكشفون ويثبتون، ولا يردّون بالاختراق أبداً. والدروس تذهب إلى الوقاية والكشف: أعطِ كل مهندس عند المورّد حساباً باسمه مع التحقق بخطوتين ووقت محدد، ونبّه عند أي سلوك يخالف القواعد التي تعرفها، لأن عنوان المهاجم لا يُعرف إلا بعد فوات الأوان، أما سلوكه فيظهر من اليوم الأول.',
     },
     realTools: ['TheHive / case management', 'MITRE ATT&CK Navigator', 'Sigma detection rules', 'SIEM correlation (Microsoft Sentinel, Splunk, Elastic)', 'Privileged access management for vendors'],
     takeaway: {
       en: 'Prove every line of the report. Attribution needs several independent clues. Detect behaviour, not just addresses.',
-      ar: 'أثبت كل سطر بالتقرير. تحديد الفاعل بدّه كذا دليل مستقل. اكشف التصرفات، مش بس العناوين.',
+      ar: 'أثبت كل سطر في التقرير. تحديد الفاعل يحتاج إلى عدة أدلة مستقلة. واكشف السلوك لا العناوين فقط.',
     },
     source: 'NIST SP 800-61 Rev. 3 (2025); MITRE ATT&CK T1199 (Trusted Relationship) and T1078 (Valid Accounts); NIST SP 800-161 Rev. 1 (supply chain risk management)',
   },
   echo: {
-    intro: { en: 'This is it. Everything we saw, from the lock screen to the vault, comes down to one name.', ar: 'هاي هي. كل إشي شفناه، من شاشة القفل للخزنة، بيوصل لاسم واحد.' },
+    intro: { en: 'This is it. Everything we saw, from the lock screen to the vault, comes down to one name.', ar: 'هذه هي النهاية. كل ما رأيناه، من شاشة القفل إلى الخزنة، ينتهي عند اسم واحد.' },
     success: {
       en: 'Kade Mercer. A comment, a username, a camera and a vendor door that opened on the wrong days. Case HELIX-0313 is closed. The report goes to legal and the police; our part was to find the truth and prove it. Good work, detective.',
-      ar: 'Kade Mercer. تعليق، واسم مستخدم، وكاميرا، وباب مورّد انفتح بالأيام الغلط. سكّرنا قضية HELIX-0313. التقرير رايح للقانونية والشرطة؛ ودورنا كان نلاقي الحقيقة ونثبتها. شغل نظيف يا محققة.',
+      ar: 'Kade Mercer. تعليق، واسم مستخدم، وكاميرا، وباب مورّد فُتح في الأيام الخطأ. أُغلقت القضية HELIX-0313. التقرير يذهب إلى الشؤون القانونية والشرطة، ودورنا كان أن نجد الحقيقة ونثبتها. عمل ممتاز أيها المحقق.',
     },
   },
   ghost: {
     taunt: {
       en: 'A comment. A camera. A username. I left you so little, and you read all of it. Fine. The mask is off.',
-      ar: 'تعليق. كاميرا. اسم مستخدم. تركتلك إشي قليل كثير، وقرأته كله. ماشي. القناع انشال.',
+      ar: 'تعليق. كاميرا. اسم مستخدم. تركت لكم القليل جداً، وقرأتموه كله. حسناً. سقط القناع.',
     },
   },
   solution: `cleanup-report.txt was built from the Mar 14 10:00 summary; ev.l19.cron (found that afternoon on db01) is missing: cat ${DB}${ACT6.crontab} -> ${ACT6.crontab}. FIN03: svchost.exe all from System32 under services.exe; Run keys SecurityHealth, OneDrive, Teams -> never. Kit (L08): "ops: km". Staff list: km = Karim Mansour (remote), Kade Mercer and Katya Morel (main office = photo GPS); kmercer (portal ${ACT6.portalAdmin}, EXIF Artist) -> Kade Mercer. vendor-gw-sessions.log: nova-svc Mar 1 and 8 are Sundays 01:xx; first outside: 2026-03-11 15:58. Rule: window. Fix: named.`,

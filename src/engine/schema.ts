@@ -134,22 +134,45 @@ export interface Objective {
   derived?: string;
 }
 
-export interface Hint {
-  tier: 'nudge' | 'direction' | 'near-solution';
-  text: L;
-  cost: number;
+/** The player's contract for a case, in plain words (Case File, briefing and Guide). */
+export interface Mission {
+  /** One sentence: what to achieve. */
+  goal: L;
+  /** The exact things and places to examine (2 to 4 items). */
+  investigate: L[];
+  /** How the player knows the case is done. */
+  success: L;
 }
+
+/**
+ * ECHO's three-tier guide. Tier 1 is `nudge`, tier 2 is `clue`, tier 3 is the full solution:
+ * one step per objective plus the security idea behind the case.
+ * Text may mark commands, paths and values with `backticks`: they render as left-to-right code.
+ */
+export interface Guide {
+  nudge: L;
+  clue: L;
+  /** objective id -> how to solve it, in order. Every objective needs a step. */
+  steps: Record<string, L>;
+  /** The security idea in two or three plain sentences. */
+  concept: L;
+}
+
+export const GUIDE_TIERS = ['nudge', 'clue', 'solution'] as const;
+export type GuideTier = (typeof GUIDE_TIERS)[number];
 
 export interface LevelConfig {
   id: string; // "L01"
   requires: { levels: string[]; evidence: string[] };
+  /** The story: the partner says it when the case opens. */
   briefing: L;
+  mission: Mission;
   apps: AppId[];
   autoOpen?: AppId[];
   world: World;
   objectives: Objective[];
-  hints: [Hint, Hint, Hint];
-  /** Collectible: saving it lets the player skip one hint tier later. */
+  guide: Guide;
+  /** Collectible: saving it makes one guide tier free later. */
   intel?: { id: string; text: L };
   rewards: { points: number; achievement?: string };
   debrief: { concept: L; realTools: string[]; takeaway: L; source: string };

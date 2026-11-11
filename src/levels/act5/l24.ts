@@ -9,7 +9,31 @@ const level: LevelConfig = {
   requires: { levels: ['L23'], evidence: ['ev.l21.mailbox', 'ev.l10.second-victim'] },
   briefing: {
     en: `Back to the stash on ws07. The photo showed us a plan; gh0st also wrote notes. One file in this folder holds more than it shows: on screen it looks perfectly normal, but its size and its bytes disagree with what you see. A terminal obeys invisible control characters, and those can paint over text. Find the file, find the trick, read the message.`,
-    ar: `رجعنا على مخبأ ws07. الصورة ورّتنا خطة؛ و gh0st كتب ملاحظات كمان. ملف واحد بهالمجلد فيه أكثر من اللي بيبيّن: على الشاشة شكله طبيعي تماماً، بس حجمه وبايتاته مش متفقين مع اللي بتشوفه. الطرفية بتطيع رموز تحكم مخفية، وهاي بتقدر ترسم فوق النص. لاقي الملف، واعرف الحيلة، واقرأ الرسالة.`,
+    ar: 'نعود إلى المخبأ على الجهاز ws07. الصورة كشفت لنا خطة، وقد كتب gh0st ملاحظات أيضاً. ملف واحد في هذا المجلد يحتوي على أكثر مما يعرض: يبدو على الشاشة طبيعياً تماماً، لكن حجمه وبايتاته لا يوافقان ما تراه. الطرفية تنفّذ رموز تحكم غير مرئية، وهذه الرموز تستطيع أن ترسم فوق النص. اعثر على الملف، واعرف الحيلة، واقرأ الرسالة.',
+  },
+  mission: {
+    goal: {
+      en: "Find the file in the stash that hides text behind invisible characters, and read the attacker's hidden note.",
+      ar: 'اعثر في المخبأ على الملف الذي يُخفي نصاً خلف رموز غير مرئية، واقرأ الملاحظة التي أخفاها المهاجم.',
+    },
+    investigate: [
+      {
+        en: 'The output of `file *` and `wc -c *` in the stash: one text file has unusual line endings and is bigger than it looks.',
+        ar: 'ناتج الأمرين `file *` و`wc -c *` في المخبأ: ملف نصي واحد له نهايات أسطر غير معتادة وحجمه أكبر مما يبدو.',
+      },
+      {
+        en: 'The same file shown with `cat -A`: control characters become visible, for example `^M`.',
+        ar: 'الملف نفسه عند عرضه بالأمر `cat -A`: رموز التحكم تصبح مرئية، مثل `^M`.',
+      },
+      {
+        en: 'The hidden comment lines: the next computer, the account and how the program will start.',
+        ar: 'أسطر التعليقات المخفية: الجهاز التالي، والحساب، وطريقة تشغيل البرنامج.',
+      },
+    ],
+    success: {
+      en: 'You have named the file, the invisible character, the next target computer and how the program would keep running there.',
+      ar: 'تكون قد كتبت اسم الملف، واسم الرمز غير المرئي، والجهاز المستهدف التالي، وعرفت كيف كان البرنامج سيبقى يعمل هناك.',
+    },
   },
   apps: ['case', 'terminal', 'hex', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -39,35 +63,35 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'file',
-      prompt: { en: 'Which file in the stash hides more text than it shows?', ar: 'أي ملف بالمخبأ مخبّي نص أكثر من اللي بيبيّن؟' },
+      prompt: { en: 'Which file in the stash hides more text than it shows?', ar: 'أي ملف في المخبأ يُخفي نصاً أكثر مما يعرض؟' },
       placeholder: 'file name',
       validator: { kind: 'answer', accept: ['fonts.conf', `${STASH}/fonts.conf`] },
       wrong: {
-        en: 'Compare what you see with what is there: file * describes line endings, wc -c counts bytes. A normal copy of the same file lives in ~/.config/fontconfig in Samir\'s home.',
-        ar: 'قارن اللي بتشوفه مع اللي موجود: ‏file * بيوصف نهايات الأسطر، و wc -c بيعدّ البايتات. ونسخة طبيعية من نفس الملف موجودة بـ ‎~/.config/fontconfig بمجلد سمير.',
+        en: "Compare what you see with what is there: `file *` describes line endings, `wc -c` counts bytes. A normal copy of the same file lives in `.config/fontconfig` in Samir's home.",
+        ar: 'قارن ما تراه بما هو موجود: الأمر `file *` يصف نهايات الأسطر، والأمر `wc -c` يعدّ البايتات. وتوجد نسخة طبيعية من الملف نفسه في المجلد `.config/fontconfig` داخل مجلد سمير الرئيسي.',
       },
     },
     {
       id: 'char',
-      prompt: { en: 'Which invisible character hides the message?', ar: 'أي رمز مخفي بيخبّي الرسالة؟' },
+      prompt: { en: 'Which invisible character hides the message?', ar: 'أي رمز غير مرئي يُخفي الرسالة؟ (اكتب اسمه بالإنجليزية)' },
       placeholder: 'character name',
       validator: { kind: 'answer', accept: ['carriage return', 'cr', '\\r', '^m', '0d', '0x0d', 'return', 'carriage-return'] },
       derived: 'cat -A shows ^M (carriage return, byte 0d) in the middle of three lines; file says "with CR, LF line terminators".',
       wrong: {
-        en: 'cat -A makes control characters visible: ^I is a tab, ^M is ... ? (xxd shows the byte too).',
-        ar: 'cat -A بيورجيك رموز التحكم: ‏^I هو tab، و ^M هو ... ؟ (و xxd بيورجيك البايت كمان).',
+        en: '`cat -A` makes control characters visible: `^I` is a tab, and `^M` is ... ? (`xxd` shows the byte too.)',
+        ar: 'الأمر `cat -A` يُظهر رموز التحكم: الرمز `^I` هو المسافة الجدولية، فما الرمز `^M`؟ (والأمر `xxd` يعرض البايت أيضاً.)',
       },
     },
     {
       id: 'next',
-      prompt: { en: 'Read the hidden lines. Which computer is next on gh0st\'s list?', ar: 'اقرأ الأسطر المخفية. أي جهاز الجاي على قائمة gh0st؟' },
+      prompt: { en: 'Read the hidden lines. Which computer is next on gh0st\'s list?', ar: 'اقرأ الأسطر المخفية. أي جهاز هو التالي في قائمة gh0st؟' },
       placeholder: 'host name',
       validator: { kind: 'answer', accept: ['FIN03', ACT5.finHost] },
-      wrong: { en: 'cat -v fonts.conf prints the hidden comments instead of letting the visible lines paint over them.', ar: 'cat -v fonts.conf بيطبع التعليقات المخفية بدل ما يخلّي الأسطر الظاهرة ترسم فوقها.' },
+      wrong: { en: '`cat -v fonts.conf` prints the hidden comments instead of letting the visible lines paint over them.', ar: 'الأمر `cat -v fonts.conf` يطبع التعليقات المخفية بدل أن تُرسم الأسطر الظاهرة فوقها.' },
       grants: [
         {
           id: 'ev.l24.next',
-          title: { en: "gh0st's hidden note: the finance PC is next", ar: 'ملاحظة gh0st المخفية: جهاز المالية هو الجاي' },
+          title: { en: "gh0st's hidden note: the finance PC is next", ar: 'ملاحظة gh0st المخفية: جهاز المالية هو التالي' },
           type: 'note',
           content: `fonts.conf (CR-hidden, 08:47 UTC): next ${ACT5.finHost} as m.chen over RDP; sync.exe named svchost, start at logon; then wipe ws07`,
           links: ['ev.l21.mailbox', 'ev.l10.second-victim'],
@@ -76,56 +100,69 @@ const level: LevelConfig = {
     },
     {
       id: 'how',
-      prompt: { en: 'According to the note, how will the program keep running on that computer?', ar: 'حسب الملاحظة، كيف البرنامج رح يضل شغّال على هداك الجهاز؟' },
+      prompt: { en: 'According to the note, how will the program keep running on that computer?', ar: 'حسب الملاحظة، كيف سيبقى البرنامج يعمل على ذلك الجهاز؟' },
       validator: {
         kind: 'choice',
         correct: 'logon',
         options: [
-          { id: 'cron', label: { en: 'A cron job every 10 minutes', ar: 'مهمة cron كل 10 دقايق' } },
-          { id: 'logon', label: { en: 'Named like svchost and started at every user logon', ar: 'باسم شبه svchost وبيشتغل كل ما المستخدم يسجّل دخول' } },
-          { id: 'service', label: { en: 'Installed as a Windows service called sync', ar: 'منصّب كخدمة ويندوز اسمها sync' } },
+          { id: 'cron', label: { en: 'A cron job every 10 minutes', ar: 'مهمة cron كل 10 دقائق' } },
+          { id: 'logon', label: { en: 'Named like svchost and started at every user logon', ar: 'باسم يشبه svchost، ويعمل عند كل تسجيل دخول للمستخدم' } },
+          { id: 'service', label: { en: 'Installed as a Windows service called sync', ar: 'يُثبَّت كخدمة ويندوز اسمها sync' } },
         ],
       },
-      wrong: { en: 'Read the third hidden line again, word by word.', ar: 'اقرأ السطر المخفي الثالث مرة ثانية، كلمة كلمة.' },
+      wrong: { en: 'Read the third hidden line again, word by word.', ar: 'اقرأ السطر المخفي الثالث مرة أخرى، كلمة كلمة.' },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: 'file * and wc -c * : one file is "with CR, LF line terminators" and is much bigger than it looks.', ar: '‏file * و wc -c * : ملف واحد "with CR, LF line terminators" وحجمه أكبر بكثير من شكله.' }, cost: 15 },
-    {
-      tier: 'direction',
-      text: {
-        en: 'A carriage return (\\r, byte 0d) sends the cursor back to the start of the line, so the text after it prints over the text before it. cat -A shows it as ^M.',
-        ar: 'رمز الرجوع (\\r، البايت 0d) بيرجّع المؤشر لأول السطر، فالنص اللي بعده بينطبع فوق النص اللي قبله. ‏cat -A بيورجيه ^M.',
-      },
-      cost: 30,
+  guide: {
+    nudge: {
+      en: 'Run `file *` and `wc -c *`: one file is "with CR, LF line terminators" and is much bigger than it looks.',
+      ar: 'شغّل `file *` و`wc -c *`: ملف واحد يوصف بالعبارة `with CR, LF line terminators` وحجمه أكبر كثيراً مما يبدو.',
     },
-    {
-      tier: 'near-solution',
-      text: {
-        en: 'cat -A fonts.conf: four comments hide behind ^M. They name the next computer, the account, the disguise and when it starts.',
-        ar: 'cat -A fonts.conf: في أربع تعليقات مخبّاية ورا ^M. بتذكر الجهاز الجاي، والحساب، والتنكّر، وإيمتى بيشتغل.',
-      },
-      cost: 45,
+    clue: {
+      en: 'A carriage return (`\\r`, byte `0d`) sends the cursor back to the start of the line, so the text after it prints over the text before it. `cat -A` shows it as `^M`.',
+      ar: 'رمز الرجوع إلى أول السطر (`\\r`، أي البايت `0d`) يعيد المؤشر إلى بداية السطر، فيُطبع النص الذي بعده فوق النص الذي قبله. الأمر `cat -A` يعرضه بالشكل `^M`.',
     },
-  ],
+    steps: {
+      file: {
+        en: 'Run `file *`. `fonts.conf` is described as "with CR, LF line terminators", which is unusual on Linux. Type `fonts.conf`.',
+        ar: 'شغّل `file *`. الملف `fonts.conf` يوصف بالعبارة `with CR, LF line terminators`، وهذا غير معتاد في لينكس. اكتب `fonts.conf`.',
+      },
+      char: {
+        en: 'Run `cat -A fonts.conf`. A `^M` appears in the middle of some lines. `^M` is the carriage return. Type `carriage return`.',
+        ar: 'شغّل `cat -A fonts.conf`. يظهر الرمز `^M` في وسط بعض الأسطر. هذا الرمز هو الرجوع إلى أول السطر. اكتب `carriage return`.',
+      },
+      next: {
+        en: 'Run `cat -v fonts.conf` to print the hidden comments. One of them says `next: FIN03 as m.chen, rdp`. Type `FIN03`.',
+        ar: 'شغّل `cat -v fonts.conf` لطباعة التعليقات المخفية. أحدها فيه `next: FIN03 as m.chen, rdp`. اكتب `FIN03`.',
+      },
+      how: {
+        en: 'The next hidden comment says `sync.exe as svchost, logon`. Choose "Named like svchost and started at every user logon".',
+        ar: 'التعليق المخفي التالي فيه `sync.exe as svchost, logon`. اختر الجواب الذي يذكر اسماً يشبه svchost وتشغيلاً عند كل تسجيل دخول.',
+      },
+    },
+    concept: {
+      en: 'A terminal does not only print characters, it also obeys control characters. A carriage return lets later text paint over earlier text, so the screen shows one thing while the file holds two. When text matters, look at the bytes with `cat -A` or `xxd`.',
+      ar: 'الطرفية لا تطبع الحروف فقط، بل تنفّذ رموز التحكم أيضاً. رمز الرجوع إلى أول السطر يجعل النص اللاحق يُرسم فوق النص السابق، فتعرض الشاشة شيئاً ويحتوي الملف على شيئين. عندما يكون النص مهماً، افحص البايتات بالأمر `cat -A` أو `xxd`.',
+    },
+  },
   rewards: { points: 160 },
   debrief: {
     concept: {
       en: 'A terminal does not just print characters, it obeys control characters. A carriage return (\\r, 0x0d) moves the cursor back to the start of the line, so whatever follows prints over what came before: the file holds both, the screen shows one. The same idea hides text in logs (log injection), in source code (Unicode direction marks, the "Trojan Source" issue, CVE-2021-42574) and in terminal output (escape sequences). Investigators never trust the screen alone: cat -A or cat -v, xxd and file show what is really in the bytes, and comparing sizes with a known-good copy shows that something is there. Hiding content like this is MITRE T1027 (Obfuscated Files or Information).',
-      ar: 'الطرفية ما بتطبع الحروف بس، هي بتطيع رموز التحكم. رمز الرجوع (\\r، ‏0x0d) بيرجّع المؤشر لأول السطر، فاللي بعده بينطبع فوق اللي قبله: الملف فيه الاثنين، والشاشة بتورجيك واحد. نفس الفكرة بتخبّي نص بالسجلات (حقن السجلات)، وبالكود المصدري (علامات اتجاه يونيكود، مشكلة "Trojan Source"، ‏CVE-2021-42574)، وبمخرجات الطرفية (تسلسلات escape). المحقق ما بيثق بالشاشة لحالها: ‏cat -A أو cat -v، و xxd، و file بيورّوا الموجود فعلاً بالبايتات، ومقارنة الحجم مع نسخة سليمة بتورجيك إنه في إشي. تخبية المحتوى بهالطريقة هي MITRE T1027 (تمويه الملفات أو المعلومات).',
+      ar: 'الطرفية لا تطبع الحروف فقط، بل تنفّذ رموز التحكم. رمز الرجوع إلى أول السطر (`\\r`، أي `0x0d`) يعيد المؤشر إلى بداية السطر، فيُطبع ما بعده فوق ما قبله: الملف يحتوي على النصين، والشاشة تعرض واحداً. الفكرة نفسها تُخفي نصاً في السجلات (حقن السجلات)، وفي الشيفرة المصدرية (علامات اتجاه يونيكود، وهي مشكلة Trojan Source ورقمها CVE-2021-42574)، وفي مخرجات الطرفية. المحقق لا يثق بالشاشة وحدها: الأوامر `cat -A` و`cat -v` و`xxd` و`file` تعرض ما في البايتات فعلاً، ومقارنة الحجم بنسخة سليمة تكشف أن هناك شيئاً زائداً. إخفاء المحتوى بهذه الطريقة يصنَّف ضمن MITRE T1027.',
     },
     realTools: ['cat -A / cat -v', 'xxd / hexdump', 'less (shows ^M)', 'grep -P "\\r"', 'editors with "show invisibles"'],
     takeaway: {
       en: 'The screen is an interpretation. When text matters, look at the bytes.',
-      ar: 'الشاشة مجرد تفسير. لما النص يكون مهم، اطّلع على البايتات.',
+      ar: 'الشاشة مجرد تفسير. عندما يكون النص مهماً، انظر إلى البايتات.',
     },
     source: 'MITRE ATT&CK T1027 (Obfuscated Files or Information); ECMA-48 (control functions, CR); Boucher & Anderson, "Trojan Source" (2021), CVE-2021-42574',
   },
   echo: {
-    intro: { en: 'Everything here looks innocent. That is exactly what bothers me.', ar: 'كل إشي هون شكله بريء. وهاد بالضبط اللي مضايقني.' },
+    intro: { en: 'Everything here looks innocent. That is exactly what bothers me.', ar: 'كل شيء هنا يبدو بريئاً. وهذا بالتحديد ما يقلقني.' },
     success: {
       en: `Their to-do list, painted over with carriage returns: ${ACT5.finHost}, Mei's account, a fake svchost. Act 6 starts there.`,
-      ar: `قائمة مهامهم، مرسوم فوقها برموز رجوع: ${ACT5.finHost}، وحساب مي، و svchost مزيّف. الفصل السادس بيبلّش من هناك.`,
+      ar: 'قائمة مهامهم كانت مغطّاة برموز الرجوع إلى أول السطر: الجهاز `HELIX-FIN03`، وحساب مي، وبرنامج svchost مزيّف. من هناك يبدأ الفصل السادس.',
     },
   },
   solution: 'file * -> fonts.conf "with CR, LF line terminators"; wc -c shows it is bigger than the clean copy in ~s.haddad/.config/fontconfig. cat -A fonts.conf -> ^M = carriage return; hidden: next FIN03 as m.chen (rdp), sync.exe as svchost, logon, wipe ws07. Choice: logon.',

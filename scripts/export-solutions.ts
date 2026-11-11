@@ -107,12 +107,12 @@ function levelHtml(meta: LevelMeta, config: LevelConfig, evidence: Map<string, E
     </div>
   </header>
   <ol class="steps">
-    <li><h3>افتح وابدأ</h3><p class="apps">البرامج بهالمرحلة: ${esc(apps)}</p><p>${rich(ar(config.hints[0].text))}</p></li>
-    <li><h3>دوّر على الدليل</h3><p>${rich(ar(config.hints[1].text))}</p></li>
-    <li><h3>اوصل للحل</h3><p>${rich(ar(config.hints[2].text))}</p></li>
-    <li><h3>جاوب على الأسئلة</h3><ol class="answers">${answers}</ol></li>
+    <li><h3>افتح وابدأ</h3><p class="apps">التطبيقات في هذه المرحلة: ${esc(apps)}</p><p>${rich(ar(config.guide.nudge))}</p></li>
+    <li><h3>ابحث عن الدليل</h3><p>${rich(ar(config.guide.clue))}</p></li>
+    <li><h3>الحل خطوة بخطوة</h3><ol class="answers">${config.objectives.map((objective) => `<li><p>${rich(ar(config.guide.steps[objective.id]))}</p></li>`).join('')}</ol></li>
+    <li><h3>أجب عن الأسئلة</h3><ol class="answers">${answers}</ol></li>
   </ol>
-  <p class="idea"><b>الفكرة:</b> ${rich(ar(config.debrief.takeaway))}</p>
+  <p class="idea"><b>الفكرة:</b> ${rich(ar(config.guide.concept))}</p>
 </section>`;
 }
 
@@ -253,8 +253,8 @@ async function main() {
     lines.push(
       '',
       'الشرح:',
-      `  كيف توصل: ${ar(config.hints[1].text)}`,
-      `  الحل خطوة بخطوة: ${ar(config.hints[2].text)}`,
+      `  تلميح محدد: ${ar(config.guide.clue)}`,
+      ...config.objectives.map((objective, index) => `  الخطوة ${index + 1}: ${ar(config.guide.steps[objective.id])}`),
       `  الفكرة من المرحلة: ${ar(config.debrief.takeaway)}`,
       `  ملخّص الأوامر (بالإنجليزي): ${config.solution}`,
       '',

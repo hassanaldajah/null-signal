@@ -61,7 +61,35 @@ const level: LevelConfig = {
   requires: { levels: ['L24'], evidence: ['ev.l22.trash', 'ev.l23.artist', 'ev.l24.next'] },
   briefing: {
     en: `BOSS. Act 5's evidence is about to go into the report, and one day a court may read it. When we acquired the five items (E1-E5) we wrote down each one's SHA-256 fingerprint in the custody record. Since then the team's working copies on ${SHARE} have changed hands. Prove which copies are still bit-for-bit identical, find what changed, who changed it and what was lost, and name the copy the report must use.`,
-    ar: `زعيم الفصل. أدلة الفصل الخامس رايحة عالتقرير، ويوم من الأيام ممكن محكمة تقرأها. لما أخذنا العناصر الخمسة (E1-E5) سجّلنا بصمة SHA-256 لكل واحد بسجل الحيازة. ومن وقتها نسخ الفريق على ${SHARE} انتقلت من إيد لإيد. أثبت أي نسخ لسا مطابقة بت ببت، ولاقي شو تغيّر، ومين غيّره، وشو ضاع، وسمّي النسخة اللي لازم التقرير يعتمد عليها.`,
+    ar: 'تحدّي الفصل. أدلة الفصل الخامس ستدخل في التقرير، وقد تقرؤها محكمة يوماً ما. عندما جمعنا العناصر الخمسة (من E1 إلى E5) سجّلنا بصمة SHA-256 لكل عنصر في سجل الحيازة. ومنذ ذلك الوقت انتقلت نسخ العمل في المجلد `/srv/share/HELIX-0313` من يد إلى يد. أثبت أي النسخ ما زالت مطابقة تماماً، واعرف ما الذي تغيّر، ومن غيّره، وماذا ضاع، وحدّد النسخة التي يجب أن يعتمدها التقرير.',
+  },
+  mission: {
+    goal: {
+      en: 'Prove which evidence copies are still identical to the originals, and find what was changed, by whom, and what was lost.',
+      ar: 'أثبت أي نسخ الأدلة ما زالت مطابقة للأصل، واعرف ما الذي تغيّر، ومن غيّره، وماذا ضاع.',
+    },
+    investigate: [
+      {
+        en: 'The custody record `HELIX-0313-custody.csv`: the SHA-256 value written down for each item (E1 to E5) when it was collected.',
+        ar: 'سجل الحيازة `HELIX-0313-custody.csv`: قيمة SHA-256 التي سُجّلت لكل عنصر (من E1 إلى E5) عند جمعه.',
+      },
+      {
+        en: "Today's values from `sha256sum /srv/share/HELIX-0313/*`, compared with the record.",
+        ar: 'القيم الحالية من الأمر `sha256sum /srv/share/HELIX-0313/*`، بمقارنتها بالسجل.',
+      },
+      {
+        en: 'The file server audit `/srv/share/.audit/share-audit.log`: who read and who wrote each file.',
+        ar: 'سجل تدقيق خادم الملفات `/srv/share/.audit/share-audit.log`: من قرأ كل ملف ومن كتب فيه.',
+      },
+      {
+        en: '`exiftool` on both copies of the photo: the team share copy and the vault original.',
+        ar: 'الأمر `exiftool` على نسختي الصورة: نسخة مجلد الفريق والأصل المحفوظ في الخزنة.',
+      },
+    ],
+    success: {
+      en: 'You have named the changed item, the person who changed it, what the change destroyed, and the copy the report must use.',
+      ar: 'تكون قد حدّدت العنصر الذي تغيّر، ومن غيّره، وما الذي أتلفه التغيير، والنسخة التي يجب أن يعتمدها التقرير.',
+    },
   },
   apps: ['case', 'terminal', 'files', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -76,55 +104,55 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'mismatch',
-      prompt: { en: 'Which item on the team share no longer matches its acquisition hash? (item ID)', ar: 'أي عنصر على مجلد الفريق ما عاد يطابق الهاش اللي انسجّل وقت أخذه؟ (رقم العنصر)' },
+      prompt: { en: 'Which item on the team share no longer matches its acquisition hash? (item ID)', ar: 'أي عنصر في مجلد الفريق لم يعد يطابق الهاش المسجَّل عند جمعه؟ (اكتب رقم العنصر)' },
       placeholder: 'E?',
       validator: { kind: 'answer', accept: ['E2', ACT5.photo, `E2-${ACT5.photo}`] },
       wrong: {
         en: `sha256sum ${SHARE}/* gives today's fingerprints. Compare each one with the sha256 column of the custody record, all 64 characters.`,
-        ar: `‏sha256sum ${SHARE}/* بيعطيك البصمات اليوم. قارن كل وحدة مع عمود sha256 بسجل الحيازة، كل الـ 64 حرف.`,
+        ar: 'الأمر `sha256sum /srv/share/HELIX-0313/*` يعطيك البصمات الحالية. قارن كل بصمة بالعمود `sha256` في سجل الحيازة، بخاناتها الـ 64 كلها.',
       },
     },
     {
       id: 'date',
-      prompt: { en: 'The share copy of x11-icon.png has a new date and a new owner. Did its content change?', ar: 'نسخة x11-icon.png على مجلد الفريق إلها تاريخ جديد وصاحب جديد. محتواها تغيّر؟' },
+      prompt: { en: 'The share copy of `x11-icon.png` has a new date and a new owner. Did its content change?', ar: 'نسخة `x11-icon.png` في مجلد الفريق لها تاريخ جديد ومالك جديد. هل تغيّر محتواها؟' },
       validator: {
         kind: 'choice',
         correct: 'same',
         options: [
-          { id: 'changed', label: { en: 'Yes: a new date means a new file', ar: 'آه: تاريخ جديد معناه ملف جديد' } },
-          { id: 'same', label: { en: 'No: its hash still matches, only the copy\'s date and owner changed', ar: 'لأ: الهاش تبعها لسا مطابق، بس تاريخ النسخة وصاحبها تغيّروا' } },
-          { id: 'unknown', label: { en: 'We cannot know without the original disk', ar: 'ما منقدر نعرف بدون القرص الأصلي' } },
+          { id: 'changed', label: { en: 'Yes: a new date means a new file', ar: 'نعم: التاريخ الجديد يعني ملفاً جديداً' } },
+          { id: 'same', label: { en: 'No: its hash still matches, only the copy\'s date and owner changed', ar: 'لا: الهاش ما زال مطابقاً، وتاريخ النسخة ومالكها فقط هما اللذان تغيّرا' } },
+          { id: 'unknown', label: { en: 'We cannot know without the original disk', ar: 'لا يمكن معرفة ذلك دون القرص الأصلي' } },
         ],
       },
-      wrong: { en: 'Dates describe the copy. The hash describes the content.', ar: 'التواريخ بتوصف النسخة. والهاش بيوصف المحتوى.' },
+      wrong: { en: 'Dates describe the copy. The hash describes the content.', ar: 'التواريخ تصف النسخة، أما الهاش فيصف المحتوى.' },
     },
     {
       id: 'who',
-      prompt: { en: 'Who changed the altered copy?', ar: 'مين غيّر النسخة اللي تعدّلت؟' },
+      prompt: { en: 'Who changed the altered copy?', ar: 'من غيّر النسخة التي تعدّلت؟' },
       placeholder: 'username',
       validator: { kind: 'answer', accept: ['l.ito'] },
       wrong: {
-        en: 'The file server audits every READ and WRITE (/srv/share/.audit). Two people wrote to the share; only one write changed the bytes.',
-        ar: 'سيرفر الملفات بيسجّل كل READ و WRITE ‏(/srv/share/.audit). شخصين كتبوا على المجلد؛ كتابة وحدة بس غيّرت البايتات.',
+        en: 'The file server audits every READ and WRITE (`/srv/share/.audit`). Two people wrote to the share, and only one write changed the bytes.',
+        ar: 'خادم الملفات يسجّل كل عملية `READ` و`WRITE` في المجلد `/srv/share/.audit`. شخصان كتبا في المجلد، وعملية كتابة واحدة فقط غيّرت البايتات.',
       },
     },
     {
       id: 'lost',
-      prompt: { en: 'What did that change destroy?', ar: 'شو خرّب هالتغيير؟' },
+      prompt: { en: 'What did that change destroy?', ar: 'ماذا أتلف هذا التغيير؟' },
       validator: {
         kind: 'choice',
         correct: 'exif',
         options: [
-          { id: 'pixels', label: { en: 'Nothing that matters: the picture still looks the same', ar: 'ولا إشي مهم: الصورة لسا شكلها نفسه' } },
-          { id: 'exif', label: { en: 'The EXIF metadata: the author, the date taken and the GPS position', ar: 'بيانات EXIF: اسم الصاحب، وتاريخ التصوير، وموقع GPS' } },
-          { id: 'name', label: { en: 'Only the file name', ar: 'اسم الملف بس' } },
+          { id: 'pixels', label: { en: 'Nothing that matters: the picture still looks the same', ar: 'لا شيء مهم: الصورة ما زالت تبدو كما هي' } },
+          { id: 'exif', label: { en: 'The EXIF metadata: the author, the date taken and the GPS position', ar: 'بيانات EXIF: اسم المالك، وتاريخ التصوير، وموقع GPS' } },
+          { id: 'name', label: { en: 'Only the file name', ar: 'اسم الملف فقط' } },
         ],
       },
-      wrong: { en: `Run exiftool on both copies: ${SHARE}/${ACT5.photo} and the vault original.`, ar: `شغّل exiftool على النسختين: ${SHARE}/${ACT5.photo} والأصل بالخزنة.` },
+      wrong: { en: `Run exiftool on both copies: ${SHARE}/${ACT5.photo} and the vault original.`, ar: 'شغّل `exiftool` على النسختين: `/srv/share/HELIX-0313/wb-0311.jpg` والأصل الموجود في الخزنة.' },
       grants: [
         {
           id: 'ev.l25.custody',
-          title: { en: 'Custody check: share photo altered, vault original intact', ar: 'فحص الحيازة: صورة المجلد متعدّلة والأصل بالخزنة سليم' },
+          title: { en: 'Custody check: share photo altered, vault original intact', ar: 'فحص الحيازة: صورة مجلد الفريق معدَّلة والأصل في الخزنة سليم' },
           type: 'hash',
           content: `E2 share copy re-saved by l.ito (SlideKit, EXIF stripped); vault E2 sha256 ${sha256(ITEMS[1][3]).slice(0, 16)}... matches the custody record`,
           links: ['ev.l23.artist', 'ev.l22.trash'],
@@ -133,55 +161,72 @@ const level: LevelConfig = {
     },
     {
       id: 'use',
-      prompt: { en: 'Which file must the report use for the photo? (full path)', ar: 'أي ملف لازم يعتمد عليه التقرير للصورة؟ (المسار الكامل)' },
+      prompt: { en: 'Which file must the report use for the photo? (full path)', ar: 'أي ملف يجب أن يعتمده التقرير للصورة؟ (المسار الكامل)' },
       placeholder: '/path/file',
       validator: { kind: 'answer', accept: [`${VAULT}/E2-${ACT5.photo}`] },
-      wrong: { en: 'The right copy is the one whose SHA-256 still equals the value written down at acquisition.', ar: 'النسخة الصح هي اللي الـ SHA-256 تبعها لسا بيساوي القيمة اللي انكتبت وقت الأخذ.' },
+      wrong: { en: 'The right copy is the one whose SHA-256 still equals the value written down at acquisition.', ar: 'النسخة الصحيحة هي التي ما زالت قيمة SHA-256 لها تساوي القيمة المسجَّلة عند جمع الدليل.' },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: `cat HELIX-0313-custody.csv, then sha256sum ${SHARE}/*`, ar: `‏cat HELIX-0313-custody.csv، وبعدين sha256sum ${SHARE}/*` }, cost: 20 },
-    {
-      tier: 'direction',
-      text: {
-        en: `grep a hash from sha256sum's output in the custody record: no match means changed. Then read /srv/share/.audit/share-audit.log and run sha256sum ${VAULT}/*.`,
-        ar: `دوّر بـ grep على هاش من ناتج sha256sum بسجل الحيازة: إذا ما طابق يعني تغيّر. وبعدين اقرأ ‎/srv/share/.audit/share-audit.log وشغّل sha256sum ${VAULT}/*.`,
-      },
-      cost: 40,
+  guide: {
+    nudge: {
+      en: 'Run `cat HELIX-0313-custody.csv`, then `sha256sum /srv/share/HELIX-0313/*`.',
+      ar: 'شغّل `cat HELIX-0313-custody.csv` ثم `sha256sum /srv/share/HELIX-0313/*`.',
     },
-    {
-      tier: 'near-solution',
-      text: {
-        en: `Only ${ACT5.photo} on the share has a new hash; l.ito saved it with SlideKit and exiftool shows the EXIF is gone. x11-icon.png was re-copied: same hash. The vault file E2-${ACT5.photo} still matches.`,
-        ar: `بس ${ACT5.photo} على المجلد إله هاش جديد؛ ‏l.ito حفظه بـ SlideKit و exiftool بيورجيك إن EXIF راح. و x11-icon.png انسخ من جديد: نفس الهاش. وملف الخزنة E2-${ACT5.photo} لسا مطابق.`,
-      },
-      cost: 60,
+    clue: {
+      en: 'Search the custody record for a hash from the `sha256sum` output with `grep`: no match means the file changed. Then read `/srv/share/.audit/share-audit.log` and run `sha256sum /srv/vault/HELIX-0313/*`.',
+      ar: 'ابحث بالأمر `grep` في سجل الحيازة عن هاش من ناتج `sha256sum`: عدم المطابقة يعني أن الملف تغيّر. ثم اقرأ `/srv/share/.audit/share-audit.log` وشغّل `sha256sum /srv/vault/HELIX-0313/*`.',
     },
-  ],
+    steps: {
+      mismatch: {
+        en: 'Run `cat HELIX-0313-custody.csv` and `sha256sum /srv/share/HELIX-0313/*`. Compare the values. Only `wb-0311.jpg` has a hash that is not in the record. It is item E2. Type `E2`.',
+        ar: 'شغّل `cat HELIX-0313-custody.csv` ثم `sha256sum /srv/share/HELIX-0313/*` وقارن القيم. الملف `wb-0311.jpg` وحده له هاش غير موجود في السجل، وهو العنصر E2. اكتب `E2`.',
+      },
+      date: {
+        en: 'The hash of the share copy of `x11-icon.png` is still in the custody record. Only its date and owner changed, because it was copied again. Choose the answer that starts with "No".',
+        ar: 'هاش نسخة `x11-icon.png` في مجلد الفريق ما زال موجوداً في سجل الحيازة. تاريخها ومالكها فقط تغيّرا لأنها نُسخت من جديد. اختر الجواب الذي يبدأ بكلمة «لا».',
+      },
+      who: {
+        en: 'Run `cat /srv/share/.audit/share-audit.log`. The line `l.ito WRITE ... wb-0311.jpg (SlideKit 3.1)` shows who saved the photo again. Type `l.ito`.',
+        ar: 'شغّل `cat /srv/share/.audit/share-audit.log`. السطر الذي فيه `l.ito` و`WRITE` واسم الصورة والبرنامج SlideKit يبيّن من حفظ الصورة من جديد. اكتب `l.ito`.',
+      },
+      lost: {
+        en: 'Run `exiftool /srv/share/HELIX-0313/wb-0311.jpg`, then `exiftool /srv/vault/HELIX-0313/E2-wb-0311.jpg`. The share copy has no `Artist`, no date taken and no GPS. Choose the EXIF answer.',
+        ar: 'شغّل `exiftool /srv/share/HELIX-0313/wb-0311.jpg` ثم `exiftool /srv/vault/HELIX-0313/E2-wb-0311.jpg`. نسخة مجلد الفريق ليس فيها `Artist` ولا تاريخ التصوير ولا موقع GPS. اختر الجواب الذي يذكر بيانات EXIF.',
+      },
+      use: {
+        en: 'Run `sha256sum /srv/vault/HELIX-0313/E2-wb-0311.jpg`: the value equals the one in the custody record. Type `/srv/vault/HELIX-0313/E2-wb-0311.jpg`.',
+        ar: 'شغّل `sha256sum /srv/vault/HELIX-0313/E2-wb-0311.jpg`: القيمة تساوي القيمة المسجّلة في سجل الحيازة. اكتب `/srv/vault/HELIX-0313/E2-wb-0311.jpg`.',
+      },
+    },
+    concept: {
+      en: 'Chain of custody is the written history of a piece of evidence: who held it, when, and proof that it did not change. The proof is a hash: the same bytes always give the same SHA-256 value, and one changed bit changes it completely. Record the hash when you collect evidence, check it at every handoff, and work only on copies.',
+      ar: 'سلسلة الحيازة هي التاريخ المكتوب لكل دليل: من أمسكه، ومتى، وإثبات أنه لم يتغيّر. وهذا الإثبات هو الهاش: البايتات نفسها تعطي دائماً قيمة SHA-256 نفسها، وتغيير بت واحد يغيّرها كلياً. سجّل الهاش عند جمع الدليل، وتحقق منه عند كل تسليم، واعمل على النسخ فقط.',
+    },
+  },
   rewards: { points: 300, achievement: 'act5-clear' },
   debrief: {
     concept: {
       en: 'Chain of custody is the written history of a piece of evidence: who collected it, who held it, when, why, and proof that it did not change. That proof is a cryptographic hash: SHA-256 of the same bytes is always the same value, and changing a single bit changes it completely. Record the hash at acquisition, check it at every handoff, and work only on copies of a write-protected original. Dates and owners describe a copy, not its content, so a re-copied file can look new and still be identical, while a file that "looks the same" (a re-saved photo) can be different. Prefer SHA-256 over MD5 and SHA-1, which have known collisions. Here a well-meaning "Save for web" silently stripped the EXIF that ties the photo to its author: the vault original saves the case.',
-      ar: 'سلسلة الحيازة هي التاريخ المكتوب لأي دليل: مين جمعه، ومين مسكه، وإيمتى، وليش، وإثبات إنه ما تغيّر. هالإثبات هو هاش تشفيري: ‏SHA-256 لنفس البايتات دايماً نفس القيمة، وتغيير بت واحد بيغيّرها كلياً. سجّل الهاش وقت الأخذ، وافحصه عند كل تسليم، واشتغل بس على نسخ من أصل محمي من الكتابة. التواريخ والمالك بيوصفوا النسخة مش محتواها، فالملف المنسوخ من جديد ممكن يبيّن جديد وهو مطابق، والملف اللي "شكله نفسه" (صورة انحفظت من جديد) ممكن يكون مختلف. استخدم SHA-256 بدل MD5 و SHA-1 لأن فيهم تصادمات معروفة. هون "حفظ للويب" بنيّة طيبة مسح بصمت بيانات EXIF اللي بتربط الصورة بصاحبها: والأصل بالخزنة أنقذ القضية.',
+      ar: 'سلسلة الحيازة هي التاريخ المكتوب لكل دليل: من جمعه، ومن أمسكه، ومتى، ولماذا، وإثبات أنه لم يتغيّر. هذا الإثبات هاش تشفيري: قيمة SHA-256 للبايتات نفسها ثابتة دائماً، وتغيير بت واحد يغيّرها كلياً. سجّل الهاش عند جمع الدليل، وتحقق منه عند كل تسليم، واعمل فقط على نسخ من أصل محمي من الكتابة. التواريخ والمالك يصفان النسخة لا محتواها، فالملف المنسوخ من جديد قد يبدو جديداً وهو مطابق، والملف الذي «يبدو كما هو» (صورة حُفظت من جديد) قد يكون مختلفاً. استخدم SHA-256 بدل MD5 و SHA-1 لأن فيهما تصادمات معروفة. هنا حذفت عملية «حفظ للويب» بحسن نيّة بيانات EXIF التي تربط الصورة بصاحبها، والأصل المحفوظ في الخزنة أنقذ القضية.',
     },
     realTools: ['sha256sum', 'hashdeep', 'FTK Imager (verify)', 'write blockers', 'evidence management systems (custody forms)'],
     takeaway: {
       en: 'Hash at acquisition, verify at every handoff, analyse copies, keep the original sealed.',
-      ar: 'خذ الهاش وقت الأخذ، وتحقق منه عند كل تسليم، وحلّل النسخ، وخلّي الأصل مختوم.',
+      ar: 'خذ الهاش عند جمع الدليل، وتحقق منه عند كل تسليم، وحلّل النسخ، واترك الأصل مختوماً.',
     },
     source: 'NIST SP 800-86 (Guide to Integrating Forensic Techniques into Incident Response); ISO/IEC 27037:2012 (digital evidence handling); NIST FIPS 180-4 (SHA-256)',
   },
   echo: {
-    intro: { en: 'Evidence that changed is evidence a lawyer will tear apart. Check every fingerprint.', ar: 'الدليل اللي تغيّر هو دليل المحامي رح يمزّعه. افحص كل بصمة.' },
+    intro: { en: 'Evidence that changed is evidence a lawyer will tear apart. Check every fingerprint.', ar: 'الدليل الذي تغيّر سيمزّقه أي محامٍ. افحص كل بصمة.' },
     success: {
       en: 'The vault kept the truth. Act 5 closed: a mailbox gone, a photo from NovaBackup, a plan for the finance PC. Act 6: we go to that PC and take the mask off.',
-      ar: 'الخزنة حفظت الحقيقة. سكّرنا الفصل الخامس: صندوق بريد طلع، وصورة من NovaBackup، وخطة لجهاز المالية. الفصل السادس: رايحين على هداك الجهاز ورح نشيل القناع.',
+      ar: 'الخزنة حفظت الحقيقة. انتهى الفصل الخامس: صندوق بريد خرج، وصورة من مكتب NovaBackup، وخطة لجهاز المالية. في الفصل السادس نذهب إلى ذلك الجهاز وننزع القناع.',
     },
   },
   ghost: {
     taunt: {
       en: 'Hashes, vaults, custody forms. So careful. Now come and find me on a machine that speaks Windows.',
-      ar: 'هاشات وخزنات واستمارات حيازة. شو حريص. هلّق تعال لاقيني على جهاز بيحكي ويندوز.',
+      ar: 'هاشات وخزنات واستمارات حيازة. يا لك من حذر. تعال الآن وابحث عني في جهاز يعمل بنظام ويندوز.',
     },
   },
   solution: `sha256sum ${SHARE}/* vs custody.csv: only ${ACT5.photo} differs -> E2. x11-icon.png re-copied by r.khalil, same hash -> same. share-audit.log: l.ito WRITE (SlideKit) -> l.ito. exiftool share copy: no EXIF -> exif. Use ${VAULT}/E2-${ACT5.photo}.`,

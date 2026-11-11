@@ -12,7 +12,27 @@ const level: LevelConfig = {
   requires: { levels: ['L01'], evidence: ['ev.l01.user'] },
   briefing: {
     en: "You're in. Samir filed IT tickets before he went silent. Use the terminal to move through his folders and find what he reported. Moving around a filesystem quickly is the first skill of every investigator.",
-    ar: 'دخلت. سمير فتح تذاكر IT قبل ما يختفي. استخدم الطرفية لتتنقّل بين مجلداته وتلاقي شو بلّغ. التنقّل السريع بنظام الملفات أول مهارة لأي محقق.',
+    ar: 'لقد دخلت. سمير فتح تذاكر دعم فني قبل أن ينقطع الاتصال به. استخدم الطرفية للتنقل بين مجلداته ومعرفة ما الذي أبلغ عنه. التنقل السريع في نظام الملفات هو أول مهارة لكل محقق.',
+  },
+  mission: {
+    goal: {
+      en: "Use the terminal to reach Samir's March tickets and find the login he reported as not his.",
+      ar: 'استخدم الطرفية للوصول إلى تذاكر سمير لشهر آذار، واعثر على عملية الدخول التي أبلغ أنها ليست له.',
+    },
+    investigate: [
+      {
+        en: "The folder `Documents/work/tickets/2026-03` inside Samir's home folder.",
+        ar: 'المجلد `Documents/work/tickets/2026-03` داخل المجلد الرئيسي لسمير.',
+      },
+      {
+        en: 'Every ticket in that folder. One IP belongs to an approved vendor. Another one is the login Samir did not approve.',
+        ar: 'كل تذكرة في ذلك المجلد. أحد العناوين يعود لمورّد تمت الموافقة عليه، وعنوان آخر هو الدخول الذي لم يوافق عليه سمير.',
+      },
+    ],
+    success: {
+      en: 'You are inside the tickets folder and you have given the suspicious IP and its login time. Both are pinned to your board.',
+      ar: 'تكون داخل مجلد التذاكر، وقد كتبت عنوان IP المشبوه ووقت الدخول. يُثبَّت الاثنان على لوحة الأدلة.',
+    },
   },
   apps: ['case', 'terminal', 'files', 'evidence'],
   autoOpen: ['case', 'terminal'],
@@ -49,24 +69,24 @@ const level: LevelConfig = {
     {
       id: 'navigate',
       prompt: {
-        en: "Navigate to Samir's March 2026 tickets folder (Documents → work → tickets → 2026-03).",
-        ar: 'روح لمجلد تذاكر سمير لشهر آذار 2026 (Documents ← work ← tickets ← 2026-03).',
+        en: "In the terminal, go to Samir's March 2026 tickets folder: `Documents/work/tickets/2026-03`.",
+        ar: 'في الطرفية، انتقل إلى مجلد تذاكر سمير لشهر آذار 2026: `Documents/work/tickets/2026-03`.',
       },
       validator: { kind: 'cwd', path: TICKETS },
     },
     {
       id: 'ip',
-      prompt: { en: 'Which IP address did Samir report as suspicious?', ar: 'شو عنوان الـ IP اللي بلّغ عنه سمير كمشبوه؟' },
+      prompt: { en: 'Which IP address did Samir report as suspicious?', ar: 'ما عنوان IP الذي أبلغ سمير أنه مشبوه؟' },
       placeholder: '0.0.0.0',
       validator: { kind: 'answer', accept: [ACT1.attackerIp] },
       wrong: {
         en: 'Read every ticket in that folder. One IP was explicitly approved, so it is not the suspect.',
-        ar: 'اقرأ كل التذاكر بالمجلد. في IP انوافق عليه رسمياً، فهو مش المشتبه فيه.',
+        ar: 'اقرأ كل التذاكر في المجلد. أحد العناوين تمت الموافقة عليه رسمياً، فهو ليس المشبوه.',
       },
       grants: [
         {
           id: 'ev.l02.ip',
-          title: { en: 'Suspicious login source', ar: 'مصدر تسجيل الدخول المشبوه' },
+          title: { en: 'Suspicious login source', ar: 'مصدر الدخول المشبوه' },
           type: 'ip',
           content: ACT1.attackerIp,
           links: ['ev.l01.user'],
@@ -75,13 +95,13 @@ const level: LevelConfig = {
     },
     {
       id: 'time',
-      prompt: { en: 'At what time (UTC, HH:MM) did that login happen?', ar: 'الساعة كم (UTC، بصيغة HH:MM) صار تسجيل الدخول؟' },
+      prompt: { en: 'At what time (UTC, HH:MM) did that login happen?', ar: 'في أي ساعة حدث هذا الدخول؟ (بتوقيت UTC وبصيغة HH:MM)' },
       placeholder: 'HH:MM',
       validator: { kind: 'answer', accept: ['03:12', '3:12'] },
       grants: [
         {
           id: 'ev.l02.time',
-          title: { en: 'First unauthorized login', ar: 'أول دخول غير مصرّح' },
+          title: { en: 'First unauthorized login', ar: 'أول دخول غير مصرّح به' },
           type: 'timestamp',
           content: '2026-03-13 03:12 UTC',
           links: ['ev.l02.ip'],
@@ -89,50 +109,55 @@ const level: LevelConfig = {
       ],
     },
   ],
-  hints: [
-    {
-      tier: 'nudge',
-      text: { en: '`pwd` shows where you are, `ls` shows what is here, `cd <folder>` moves you in.', ar: '`pwd` بيوريك وين إنت، `ls` بيوريك شو في هون، و `cd <مجلد>` بيدخلك عليه.' },
-      cost: 10,
+  guide: {
+    nudge: {
+      en: '`pwd` shows where you are, `ls` shows what is here, `cd <folder>` moves you in.',
+      ar: 'الأمر `pwd` يعرض مكانك الحالي، و`ls` يعرض محتويات المجلد، و`cd <folder>` يدخلك إلى مجلد.',
     },
-    {
-      tier: 'direction',
-      text: {
-        en: 'You can jump several levels at once: `cd Documents/work/tickets/2026-03`. Then `cat` each ticket.',
-        ar: 'بتقدر تنط كذا مستوى مرة وحدة: `cd Documents/work/tickets/2026-03`، وبعدين `cat` لكل تذكرة.',
+    clue: {
+      en: 'You can jump several levels at once: `cd Documents/work/tickets/2026-03`. Then `cat` each ticket.',
+      ar: 'يمكنك عبور عدة مجلدات دفعة واحدة: `cd Documents/work/tickets/2026-03`. ثم اقرأ كل تذكرة بالأمر `cat`.',
+    },
+    steps: {
+      navigate: {
+        en: 'Type `cd Documents/work/tickets/2026-03` and press Enter. `pwd` confirms where you are.',
+        ar: 'اكتب `cd Documents/work/tickets/2026-03` ثم اضغط Enter. الأمر `pwd` يؤكد لك مكانك.',
       },
-      cost: 20,
-    },
-    {
-      tier: 'near-solution',
-      text: {
-        en: 'TCK-1185 is an APPROVED vendor. TCK-1187 is the one Samir did not authorize; it has the IP and the time.',
-        ar: 'TCK-1185 مورّد مُوافَق عليه. TCK-1187 هي اللي سمير ما وافق عليها؛ فيها الـ IP والوقت.',
+      ip: {
+        en: 'Run `ls`, then read the tickets with `cat`, for example `cat TCK-1187.txt`. Ticket TCK-1185 is a vendor that was approved. Ticket TCK-1187 is the login Samir did not approve. Its IP is `203.0.113.77`.',
+        ar: 'شغّل `ls` ثم اقرأ التذاكر بالأمر `cat`، مثل `cat TCK-1187.txt`. التذكرة TCK-1185 تخص مورّداً تمت الموافقة عليه. التذكرة TCK-1187 هي الدخول الذي لم يوافق عليه سمير، وعنوانه `203.0.113.77`.',
       },
-      cost: 35,
+      time: {
+        en: 'The same ticket, TCK-1187, says the login happened at 03:12 UTC. Type `03:12`.',
+        ar: 'التذكرة نفسها TCK-1187 تذكر أن الدخول حدث الساعة 03:12 بتوقيت UTC. اكتب `03:12`.',
+      },
     },
-  ],
+    concept: {
+      en: 'In Linux everything is a file inside a tree of folders. Three commands are enough to move around: `ls` lists, `cd` enters, `cat` reads. An IP address in a ticket is not automatically bad: the context decides.',
+      ar: 'في لينكس كل شيء ملف داخل شجرة من المجلدات. ثلاثة أوامر تكفي للتنقل: `ls` للعرض، و`cd` للدخول، و`cat` للقراءة. ووجود عنوان IP في تذكرة لا يعني أنه خبيث: السياق هو الذي يحسم.',
+    },
+  },
   rewards: { points: 100 },
   debrief: {
     concept: {
       en: 'Linux paths: "/" is the root, "~" is your home, "." is here and ".." is one level up. Absolute paths start with "/"; relative paths start from where you are. ls lists, cd moves, pwd prints your location, cat prints a file.',
-      ar: 'مسارات لينكس: "/" هو الجذر، "~" هو مجلدك الرئيسي، "." هون، و ".." مستوى لفوق. المسار المطلق بيبلّش بـ "/"، والنسبي بيبلّش من مكانك. ls بيعرض، cd بينقل، pwd بيطبع مكانك، و cat بيطبع الملف.',
+      ar: 'مسارات لينكس: `/` هو الجذر، و`~` هو مجلدك الرئيسي، و`.` هو المجلد الحالي، و`..` هو المجلد الأعلى. المسار المطلق يبدأ بالرمز `/`، والمسار النسبي يبدأ من مكانك الحالي. الأمر `ls` يعرض المحتويات، و`cd` ينقلك، و`pwd` يطبع مكانك، و`cat` يطبع محتوى ملف.',
     },
     realTools: ['bash', 'ls', 'cd', 'pwd', 'cat', 'tree'],
     takeaway: {
       en: 'Separate signal from noise: an IP in a ticket is not automatically malicious. Context (approved vs unexplained) decides.',
-      ar: 'افصل الإشارة عن الضجيج: وجود IP بتذكرة ما بيعني إنه خبيث. السياق (موافَق عليه أو مش مفسَّر) هو اللي بيحسم.',
+      ar: 'افصل المهم عن الضجيج: وجود عنوان IP في تذكرة لا يعني أنه خبيث. السياق هو الذي يحسم: هل تمت الموافقة عليه، أم لا يوجد تفسير له؟',
     },
     source: 'GNU Coreutils manual; Filesystem Hierarchy Standard 3.0; IPs from RFC 5737 documentation ranges',
   },
   echo: {
     intro: {
       en: 'Samir left a paper trail. Start with `ls` and `cd` — the terminal is faster than clicking once you know the paths.',
-      ar: 'سمير ترك أثر ورقي. ابدأ بـ `ls` و `cd`؛ الطرفية أسرع من الكبس لما تعرف المسارات.',
+      ar: 'سمير ترك وراءه سجلاً مكتوباً. ابدأ بالأمرين `ls` و`cd`. الطرفية أسرع من النقر عندما تعرف المسارات.',
     },
     success: {
       en: 'An IP and a time. That is the first thread. Every later clue will hang from it.',
-      ar: 'IP ووقت. هاد أول خيط، وكل الأدلة الجاية رح تتعلّق فيه.',
+      ar: 'عنوان IP ووقت. هذا أول خيط، وكل الأدلة القادمة سترتبط به.',
     },
   },
   solution: 'cd Documents/work/tickets/2026-03 ; cat TCK-1187.txt -> 203.0.113.77 at 03:12. TCK-1185 vendor IP is a decoy.',

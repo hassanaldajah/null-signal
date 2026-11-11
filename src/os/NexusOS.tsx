@@ -3,20 +3,22 @@ import { useEffect, useState } from 'react';
 import { play } from '../audio/sfx';
 import { useRuntime } from '../engine/runtime';
 import type { AppId } from '../engine/schema';
-import { useI18n } from '../i18n';
+import { type UiKey, useI18n } from '../i18n';
 import { useFlow } from '../store/flow';
 import { EMPTY_LIST } from '../store/empty';
 import { useGame } from '../store/game';
-import { useEcho } from '../ui/echo';
+import { useEcho, useGuide } from '../ui/echo';
 import { toast } from '../ui/Toasts';
 import { APPS } from './apps';
 import BriefingIntro from './BriefingIntro';
 import Debrief from './Debrief';
 import EchoCorner from './EchoCorner';
+import Guide from './Guide';
 import Lockscreen from './Lockscreen';
 import Window from './Window';
 import { useWindows } from './windowStore';
 import './os.css';
+import './guide.css';
 
 export function openApp(id: AppId): void {
   play('open');
@@ -28,6 +30,7 @@ export default function NexusOS() {
   const runtime = useRuntime((state) => state.runtime)!;
   const finished = useRuntime((state) => state.finished);
   const fresh = useRuntime((state) => state.fresh);
+  const achievement = useRuntime((state) => state.achievement);
   const windows = useWindows((state) => state.windows);
   const topZ = useWindows((state) => state.topZ);
   const go = useFlow((state) => state.go);
@@ -40,6 +43,7 @@ export default function NexusOS() {
 
   useEffect(() => {
     useWindows.getState().reset();
+    useGuide.getState().setOpen(false);
     const timer = setInterval(() => setClock(new Date()), 30_000);
     return () => clearInterval(timer);
   }, []); // once per level: NexusOS is keyed by level id
@@ -47,7 +51,7 @@ export default function NexusOS() {
   // The partner briefs the case first; the desktop wakes up when the detective answers.
   const begin = () => {
     setBriefed(true);
-    useEcho.getState().say(tl(config.echo.intro), 'talk');
+    useEcho.getState().say(config.echo.intro, 'talk');
     if (!locked) for (const app of config.autoOpen ?? ['case']) openApp(app);
   };
 
@@ -60,8 +64,13 @@ export default function NexusOS() {
   useEffect(() => {
     if (!finished) return;
     play('success');
-    useEcho.getState().say(tl(config.echo.success), 'talk');
-  }, [finished, config, tl]);
+    useGuide.getState().setOpen(false);
+    useEcho.getState().say(config.echo.success, 'talk');
+  }, [finished, config]);
+
+  useEffect(() => {
+    if (achievement) toast(`★ ${t('achievement.unlocked')}: ${t(`achievement.${achievement}` as UiKey)}`, 'success');
+  }, [achievement, t]);
 
   const unlocked = () => {
     for (const app of config.autoOpen ?? ['case']) openApp(app);
@@ -120,6 +129,7 @@ export default function NexusOS() {
       </footer>
 
       <EchoCorner />
+      <Guide />
       <AnimatePresence>{!briefed && <BriefingIntro onStart={begin} />}</AnimatePresence>
       <AnimatePresence>{finished && <Debrief />}</AnimatePresence>
     </div>

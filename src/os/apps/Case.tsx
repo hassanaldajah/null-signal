@@ -3,13 +3,16 @@ import { type FormEvent, useState } from 'react';
 import { play } from '../../audio/sfx';
 import { currentScore, useRuntime } from '../../engine/runtime';
 import type { Objective } from '../../engine/schema';
-import { useI18n } from '../../i18n';
+import { placeholderFor, useI18n } from '../../i18n';
 import { EMPTY_LIST } from '../../store/empty';
 import { useGame } from '../../store/game';
-import { useEcho } from '../../ui/echo';
+import { useGuide } from '../../ui/echo';
+import Rich from '../../ui/Rich';
 import './apps.css';
 
-/** Briefing, objectives (unlocked one at a time) and ECHO's tiered hints. */
+const ARABIC = /[؀-ۿ]/;
+
+/** The mission in plain words, the objectives (unlocked one at a time) and the way to the Guide. */
 export default function Case() {
   const { t, tl } = useI18n();
   const runtime = useRuntime((state) => state.runtime)!;
@@ -17,39 +20,37 @@ export default function Case() {
   const solved: readonly string[] = useGame((state) => state.objectives[config.id] ?? EMPTY_LIST);
   const hintsRevealed = useGame((state) => state.hints[config.id] ?? 0);
   const freeTiers: readonly number[] = useGame((state) => state.freeHints[config.id] ?? EMPTY_LIST);
-  const intel = useGame((state) => state.intel);
-  const intelLeft = intel.collected.filter((id) => !intel.spent.includes(id)).length;
   const firstOpen = config.objectives.findIndex((objective) => !solved.includes(objective.id));
-
-  const askEcho = () => {
-    const tier = config.hints[hintsRevealed];
-    if (!tier) return;
-    useGame.getState().revealHint(config.id);
-    play('hint');
-    useEcho.getState().say(tl(tier.text), 'point');
-  };
-
-  const useIntel = () => {
-    const tier = config.hints[hintsRevealed];
-    if (!tier || !useGame.getState().spendIntel(config.id)) return;
-    play('hint');
-    useEcho.getState().say(tl(tier.text), 'point');
-  };
+  const total = config.objectives.length;
 
   return (
     <div className="case">
-      <section>
-        <div className="label">{t('case.briefing')}</div>
-        <p className="briefing">{tl(config.briefing)}</p>
+      <section className="mission">
+        <h4>{t('guide.mission')}</h4>
+        <p className="mission-goal"><Rich text={tl(config.mission.goal)} /></p>
+        <h4>{t('guide.investigate')}</h4>
+        <ul>
+          {config.mission.investigate.map((item, index) => <li key={index}><Rich text={tl(item)} /></li>)}
+        </ul>
+        <h4>{t('guide.success')}</h4>
+        <p><Rich text={tl(config.mission.success)} /></p>
         {config.requires.evidence.length > 0 && <p className="requires">⌗ {t('case.requires')}</p>}
+        <details className="story">
+          <summary>{t('case.story')}</summary>
+          <p className="briefing"><Rich text={tl(config.briefing)} /></p>
+        </details>
       </section>
 
       <section>
-        <div className="label">{t('case.objectives')}</div>
+        <div className="case-row">
+          <span className="label">{t('case.objectives')}</span>
+          <span className="dim small">{t('case.step', { n: firstOpen < 0 ? total : firstOpen + 1, total })}</span>
+        </div>
         <ol className="objectives">
           {config.objectives.map((objective, index) => (
             <ObjectiveRow
               key={objective.id}
+              number={index + 1}
               objective={objective}
               state={solved.includes(objective.id) ? 'solved' : index === firstOpen ? 'active' : 'locked'}
               isLock={config.world.lockscreen?.objective === objective.id}
@@ -58,48 +59,32 @@ export default function Case() {
         </ol>
       </section>
 
-      <section className="hints">
-        <div className="hints-head">
-          <span className="label">ECHO</span>
-          <span className="score mono">{currentScore(config, hintsRevealed, freeTiers)} / {config.rewards.points}</span>
-        </div>
-        {config.hints.slice(0, hintsRevealed).map((hint) => (
-          <motion.div key={hint.tier} className={`hint-card ${hint.tier}`} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
-            <span className="label">{t(`hint.tier.${hint.tier}`)}</span>
-            <p>{tl(hint.text)}</p>
-          </motion.div>
-        ))}
-        {hintsRevealed < 3 ? (
-          <div className="hint-actions">
-            <button className="btn" onClick={askEcho}>
-              {t('hint.ask')} <span className="cost">{t('hint.cost', { cost: config.hints[hintsRevealed].cost })}</span>
-            </button>
-            {intelLeft > 0 && <button className="btn ghost" onClick={useIntel}>◆ {t('hint.intel')} ({intelLeft})</button>}
-          </div>
-        ) : (
-          <p className="dim">{t('hint.none')}</p>
-        )}
+      <section className="case-foot">
+        <span><span className="label">{t('case.score')}</span> <span className="score mono">{currentScore(config, hintsRevealed, freeTiers)} / {config.rewards.points}</span></span>
+        <button className="btn small" onClick={() => { play('open'); useGuide.getState().setOpen(true); }}>
+          <span aria-hidden="true">?</span> {t('case.openGuide')}
+        </button>
       </section>
     </div>
   );
 }
 
-function ObjectiveRow({ objective, state, isLock }: { objective: Objective; state: 'solved' | 'active' | 'locked'; isLock: boolean }) {
-  const { t, tl } = useI18n();
+function ObjectiveRow({ number, objective, state, isLock }: { number: number; objective: Objective; state: 'solved' | 'active' | 'locked'; isLock: boolean }) {
+  const { t, tl, lang, dir } = useI18n();
   const submit = useRuntime((s) => s.submit);
   const [value, setValue] = useState('');
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState(false);
   const shake = useAnimationControls();
   const { validator } = objective;
 
   const attempt = (input: string) => {
     if (submit(objective.id, input)) {
       play('success');
-      setFeedback('');
+      setFeedback(false);
       return;
     }
     play('error');
-    setFeedback(tl(objective.wrong) || t('case.wrong'));
+    setFeedback(true);
     shake.start({ x: [0, -10, 8, -5, 3, 0], transition: { duration: 0.35 } });
   };
 
@@ -111,31 +96,41 @@ function ObjectiveRow({ objective, state, isLock }: { objective: Objective; stat
   return (
     <motion.li className={`objective ${state}`} animate={shake}>
       <div className="objective-prompt">
-        <span className="objective-mark">{state === 'solved' ? '✔' : state === 'active' ? '◉' : '○'}</span>
-        <span>{tl(objective.prompt)}</span>
+        <span className="objective-mark mono">{state === 'solved' ? '✔' : number}</span>
+        <span><Rich text={tl(objective.prompt)} /></span>
       </div>
       {state === 'active' && !isLock && (validator.kind === 'command' || validator.kind === 'cwd') && (
         <p className="dim small">{t('case.terminalTask')}</p>
       )}
       {state === 'active' && !isLock && validator.kind === 'choice' && (
         <div className="choices">
-          {validator.options.map((option) => (
-            <button key={option.id} className="btn ghost" onClick={() => attempt(option.id)}>{tl(option.label)}</button>
-          ))}
+          {validator.options.map((option) => {
+            const label = tl(option.label);
+            return (
+              <button key={option.id} className="btn ghost choice" dir={ARABIC.test(label) ? undefined : 'ltr'} onClick={() => attempt(option.id)}>
+                <span><Rich text={label} /></span>
+              </button>
+            );
+          })}
         </div>
       )}
       {state === 'active' && !isLock && (validator.kind === 'answer' || validator.kind === 'evidence') && (
         <form className="answer" onSubmit={onSubmit}>
           <input
-            className="input ltr"
+            className="input answer-input"
+            // Answers are Latin text; an empty box follows the page so an Arabic placeholder reads right.
+            dir={value ? 'ltr' : dir}
             value={value}
-            placeholder={objective.placeholder ?? '…'}
+            placeholder={placeholderFor(lang, objective.placeholder)}
             onChange={(event) => setValue(event.target.value)}
+            autoCapitalize="off"
+            autoCorrect="off"
+            spellCheck={false}
           />
           <button className="btn primary" type="submit">{t('case.submit')}</button>
         </form>
       )}
-      {feedback && state === 'active' && <p className="feedback">{feedback}</p>}
+      {feedback && state === 'active' && <p className="feedback" role="status"><Rich text={tl(objective.wrong) || t('case.wrong')} /></p>}
     </motion.li>
   );
 }

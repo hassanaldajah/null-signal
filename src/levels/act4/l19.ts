@@ -53,7 +53,31 @@ const level: LevelConfig = {
   requires: { levels: ['L18'], evidence: ['ev.l18.exfil', 'ev.l04.account'] },
   briefing: {
     en: `A beacon dies when its process crashes or the server restarts, so attackers give it a clock. cron runs scheduled jobs from /etc/crontab, /etc/cron.d/ and each user's crontab in ${SPOOL}/. One job on ${ACT4.dbHost} has no ticket and no business being there. Find it, read its schedule, count how often it already ran, and work out what installed it.`,
-    ar: `برنامج الاتصال بيموت لما تنهار عمليته أو يرجع السيرفر يشتغل من جديد، فالمهاجمين بيعطوه ساعة. cron بيشغّل المهام المجدولة من /etc/crontab و /etc/cron.d/ ومن crontab كل مستخدم بـ ${SPOOL}/. في مهمة على ${ACT4.dbHost} ما إلها تذكرة وما إلها شغل هون. لاقيها، واقرأ جدولها، واحسب كم مرة اشتغلت، واعرف مين ركّبها.`,
+    ar: 'برنامج الاتصال يتوقف إذا تعطّلت عمليته أو أُعيد تشغيل الخادم، ولذلك يعطيه المهاجمون ساعة توقظه. خدمة cron تشغّل المهام المجدولة من `/etc/crontab` ومن `/etc/cron.d/` ومن ملف كل مستخدم في `/var/spool/cron/crontabs/`. توجد مهمة على الخادم `helix-db01` ليس لها تذكرة ولا سبب لوجودها. اعثر عليها، واقرأ جدولها، واحسب كم مرة عملت، واعرف ما الذي ثبّتها.',
+  },
+  mission: {
+    goal: {
+      en: "Find the scheduled job that keeps the attacker's program alive on the database server.",
+      ar: 'اعثر على المهمة المجدولة التي تُبقي برنامج المهاجم يعمل على خادم قاعدة البيانات.',
+    },
+    investigate: [
+      {
+        en: "Every place cron reads jobs from: `/etc/crontab`, `/etc/cron.d/` and each user's file in `/var/spool/cron/crontabs/`.",
+        ar: 'كل مكان تقرأ منه خدمة cron المهام: `/etc/crontab` و`/etc/cron.d/` وملف كل مستخدم في `/var/spool/cron/crontabs/`.',
+      },
+      {
+        en: 'The job that runs a program from `/tmp`.',
+        ar: 'المهمة التي تشغّل برنامجاً من `/tmp`.',
+      },
+      {
+        en: 'The file `/var/log/syslog`: cron writes a `CMD` line for every run, and a `REPLACE` line when a crontab changes.',
+        ar: 'الملف `/var/log/syslog`: خدمة cron تكتب فيه سطر `CMD` عند كل تشغيل، وسطر `REPLACE` عند تغيير ملف مهام.',
+      },
+    ],
+    success: {
+      en: 'You have named the file with the bad job, how often it runs, how many times it ran, and what installed it.',
+      ar: 'تكون قد كتبت اسم الملف الذي فيه المهمة الخبيثة، وكل كم دقيقة تعمل، وكم مرة عملت، وما الذي ثبّتها.',
+    },
   },
   apps: ['case', 'terminal', 'logs', 'evidence'],
   autoOpen: ['case', 'evidence', 'terminal'],
@@ -123,17 +147,17 @@ const level: LevelConfig = {
   objectives: [
     {
       id: 'file',
-      prompt: { en: 'Which file holds the job that should not be there?', ar: 'أي ملف فيه المهمة اللي ما لازم تكون موجودة؟' },
+      prompt: { en: 'Which file holds the job that should not be there?', ar: 'أي ملف يحتوي على المهمة التي لا يجوز أن تكون موجودة؟' },
       placeholder: '/path',
       validator: { kind: 'answer', accept: [ACT4.crontab] },
       wrong: {
         en: `Check every place cron reads, including each user's file in ${SPOOL}/. Which job runs a program from /tmp?`,
-        ar: `افحص كل مكان cron بيقرأ منه، ومعهم ملف كل مستخدم بـ ${SPOOL}/. أي مهمة بتشغّل برنامج من /tmp؟`,
+        ar: 'افحص كل مكان تقرأ منه خدمة cron، ومنه ملف كل مستخدم في `/var/spool/cron/crontabs/`. أي مهمة تشغّل برنامجاً من `/tmp`؟',
       },
       grants: [
         {
           id: 'ev.l19.cron',
-          title: { en: 'Beacon scheduled every 10 minutes', ar: 'برنامج الاتصال مجدول كل 10 دقايق' },
+          title: { en: 'Beacon scheduled every 10 minutes', ar: 'برنامج الاتصال مجدول كل 10 دقائق' },
           type: 'artifact',
           content: `${ACT4.crontab}: ${ACT4.cronLine} (installed Mar 13 03:50:05)`,
           links: ['ev.l18.exfil', 'ev.l04.account'],
@@ -142,76 +166,96 @@ const level: LevelConfig = {
     },
     {
       id: 'every',
-      prompt: { en: 'How often does it run? (minutes)', ar: 'كل قديش بتشتغل؟ (بالدقايق)' },
+      prompt: { en: 'How often does it run? (minutes)', ar: 'كل كم دقيقة تعمل هذه المهمة؟' },
       placeholder: 'minutes',
       validator: { kind: 'answer', accept: ['10', '10 minutes', 'every 10 minutes', '10 min', '10m'] },
       wrong: {
-        en: 'The five time fields are: minute, hour, day of month, month, day of week. */N in the minute field means "every N minutes".',
-        ar: 'حقول الوقت الخمسة هي: الدقيقة، الساعة، يوم الشهر، الشهر، يوم الأسبوع. */N بحقل الدقيقة معناها "كل N دقيقة".',
+        en: 'The five time fields are: minute, hour, day of month, month, day of week. `*/N` in the minute field means "every N minutes".',
+        ar: 'حقول الوقت الخمسة هي: الدقيقة، والساعة، ويوم الشهر، والشهر، ويوم الأسبوع. الصيغة `*/N` في حقل الدقيقة تعني «كل N دقيقة».',
       },
     },
     {
       id: 'runs',
-      prompt: { en: `cron writes a CMD line to ${SYSLOG} every time it runs a job. How many times has this job run so far?`, ar: `cron بيكتب سطر CMD بـ ${SYSLOG} كل ما يشغّل مهمة. كم مرة اشتغلت هالمهمة لحد هلّق؟` },
+      prompt: { en: 'cron writes a `CMD` line to `/var/log/syslog` every time it runs a job. How many times has this job run so far?', ar: 'خدمة cron تكتب سطر `CMD` في `/var/log/syslog` كلما شغّلت مهمة. كم مرة عملت هذه المهمة حتى الآن؟' },
       placeholder: 'number',
       validator: { kind: 'answer', accept: [String(RUNS)] },
       derived: `grep -c "sync --quiet" ${SYSLOG}`,
       wrong: {
-        en: 'grep -c counts matching lines. Match the command itself, not just "CRON": other jobs run every 10 minutes too.',
-        ar: 'grep -c بيعدّ الأسطر المطابقة. طابق الأمر نفسه، مش بس "CRON": في مهام ثانية كمان بتشتغل كل 10 دقايق.',
+        en: '`grep -c` counts matching lines. Match the command itself, not just `CRON`: other jobs run every 10 minutes too.',
+        ar: 'الأمر `grep -c` يعدّ الأسطر المطابقة. طابق نص الأمر نفسه لا كلمة `CRON` فقط: توجد مهام أخرى تعمل كل 10 دقائق أيضاً.',
       },
     },
     {
       id: 'writer',
       prompt: {
-        en: `The job was installed at 03:50:05, but ${CMDLOG} shows j.ortiz never typed crontab. What installed it?`,
-        ar: `المهمة انركّبت الساعة 03:50:05، بس ${CMDLOG} بيورّي إنه j.ortiz ما كتب crontab أبداً. مين ركّبها؟`,
+        en: 'The job was installed at 03:50:05, but `/var/log/commands.log` shows that `j.ortiz` never typed `crontab`. What installed it?',
+        ar: 'ثُبّتت المهمة الساعة 03:50:05، لكن السجل `/var/log/commands.log` يبيّن أن `j.ortiz` لم يكتب الأمر `crontab` أبداً. ما الذي ثبّتها؟',
       },
       validator: {
         kind: 'choice',
         correct: 'beacon',
         options: [
-          { id: 'beacon', label: { en: 'The beacon itself: .sync was running as j.ortiz after the 03:49 push and piped the line in', ar: 'برنامج الاتصال نفسه: .sync كان شغّال باسم j.ortiz بعد الإرسال الساعة 03:49 ودخّل السطر من pipe' } },
-          { id: 'admin', label: { en: 'r.khalil, during night maintenance', ar: 'r.khalil، وقت صيانة بالليل' } },
-          { id: 'typed', label: { en: 'j.ortiz typed crontab -e and the logs simply missed it', ar: 'j.ortiz كتب crontab -e والسجلات ببساطة ما لقطته' } },
+          { id: 'beacon', label: { en: 'The beacon itself: .sync was running as j.ortiz after the 03:49 push and piped the line in', ar: 'برنامج الاتصال نفسه: كان `.sync` يعمل باسم `j.ortiz` بعد الإرسال الساعة 03:49، وأدخل السطر مباشرة دون محرّر' } },
+          { id: 'admin', label: { en: 'r.khalil, during night maintenance', ar: 'الموظف r.khalil أثناء صيانة ليلية' } },
+          { id: 'typed', label: { en: 'j.ortiz typed crontab -e and the logs simply missed it', ar: 'كتب `j.ortiz` الأمر `crontab -e` لكن السجلات لم تلتقطه' } },
         ],
       },
       wrong: {
         en: 'Compare the crontab headers: "(- installed" means it came from a pipe, not from an editor. Who was running as j.ortiz at 03:50?',
-        ar: 'قارن رؤوس ملفات crontab: "(- installed" معناها إجا من pipe مش من محرّر. مين كان شغّال باسم j.ortiz الساعة 03:50؟',
+        ar: 'قارن رؤوس ملفات المهام: العبارة `(- installed` تعني أن المهمة جاءت عبر توجيه مباشر لا من محرّر. من كان يعمل باسم `j.ortiz` الساعة 03:50؟',
       },
     },
   ],
-  hints: [
-    { tier: 'nudge', text: { en: `List the user crontabs: ls -l ${SPOOL}. crontab -l -u <user> prints one of them.`, ar: `اعرض ملفات المستخدمين: ls -l ${SPOOL}. و crontab -l -u <user> بيطبع واحد منهم.` }, cost: 15 },
-    { tier: 'direction', text: { en: `The odd job runs something from /tmp. Count its runs with grep -c on its command in ${SYSLOG}.`, ar: `المهمة الغريبة بتشغّل إشي من /tmp. عدّ مرات تشغيلها بـ grep -c على الأمر تبعها بـ ${SYSLOG}.` }, cost: 30 },
-    {
-      tier: 'near-solution',
-      text: {
-        en: `crontab -l -u j.ortiz shows "${ACT4.cronLine}" and "(- installed on Fri Mar 13 03:50:05 2026)". grep -c "sync --quiet" ${SYSLOG}.`,
-        ar: `crontab -l -u j.ortiz بيورجيك "${ACT4.cronLine}" و "(- installed on Fri Mar 13 03:50:05 2026)". وبعدها grep -c "sync --quiet" ${SYSLOG}.`,
-      },
-      cost: 45,
+  guide: {
+    nudge: {
+      en: 'List the user crontabs with `ls -l /var/spool/cron/crontabs`. The command `crontab -l -u USER` prints one of them.',
+      ar: 'اعرض ملفات المهام الخاصة بالمستخدمين: `ls -l /var/spool/cron/crontabs`. والأمر `crontab -l -u USER` يطبع مهام مستخدم واحد.',
     },
-  ],
+    clue: {
+      en: 'The odd job runs something from `/tmp`. Count its runs with `grep -c` on its command in `/var/log/syslog`.',
+      ar: 'المهمة الغريبة تشغّل برنامجاً من `/tmp`. عُدّ مرات تشغيلها بالأمر `grep -c` على نص أمرها في `/var/log/syslog`.',
+    },
+    steps: {
+      file: {
+        en: 'Run `ls -l /var/spool/cron/crontabs`. The file `j.ortiz` was changed on Mar 13 at 03:50. Run `crontab -l -u j.ortiz`: its job runs `/tmp/.X11-cache/.sync`. Type `/var/spool/cron/crontabs/j.ortiz`.',
+        ar: 'شغّل `ls -l /var/spool/cron/crontabs`. الملف `j.ortiz` عُدّل في 13 آذار الساعة 03:50. شغّل `crontab -l -u j.ortiz`: مهمته تشغّل `/tmp/.X11-cache/.sync`. اكتب `/var/spool/cron/crontabs/j.ortiz`.',
+      },
+      every: {
+        en: 'The job line starts with `*/10 * * * *`. The first field is the minute, and `*/10` means every 10 minutes. Type `10`.',
+        ar: 'سطر المهمة يبدأ بالنص `*/10 * * * *`. الحقل الأول هو الدقيقة، والصيغة `*/10` تعني كل 10 دقائق. اكتب `10`.',
+      },
+      runs: {
+        en: 'Count the job\'s own lines in the system log: `grep -c "sync --quiet" /var/log/syslog`. The answer is 216.',
+        ar: 'عُدّ أسطر هذه المهمة نفسها في سجل النظام: `grep -c "sync --quiet" /var/log/syslog`. الجواب 216.',
+      },
+      writer: {
+        en: 'The header of that crontab says `(- installed on`. The dash means the job came through a pipe, not from an editor. `grep -c crontab /var/log/commands.log` prints 0, so nobody typed it. Choose "The beacon itself".',
+        ar: 'رأس ملف المهام فيه العبارة `(- installed on`. الشرطة تعني أن المهمة جاءت عبر توجيه مباشر لا من محرّر. والأمر `grep -c crontab /var/log/commands.log` يطبع 0، أي أن أحداً لم يكتبه. اختر «برنامج الاتصال نفسه».',
+      },
+    },
+    concept: {
+      en: 'cron runs jobs on a schedule, and attackers add a job so their program starts again after a crash or a reboot. To find it, list every crontab and look for programs in `/tmp` or in hidden folders. Every scheduled job should have an owner and a reason.',
+      ar: 'خدمة cron تشغّل المهام وفق جدول، والمهاجمون يضيفون مهمة ليعود برنامجهم إلى العمل بعد أي عطل أو إعادة تشغيل. لتكشفها، اعرض كل ملفات المهام وابحث عن برامج في `/tmp` أو في مجلدات مخفية. كل مهمة مجدولة يجب أن يكون لها مالك وسبب.',
+    },
+  },
   rewards: { points: 150 },
   debrief: {
     concept: {
       en: `cron runs scheduled jobs. System jobs live in /etc/crontab and /etc/cron.d/ (with a user column); each user's jobs live in ${SPOOL}/<user> (crontab -l -u <user>). The five time fields are minute, hour, day of month, month and day of week, so */10 means every 10 minutes. Attackers add a job that restarts their program so access survives crashes and reboots (MITRE T1053.003). To hunt: list every crontab, look for programs in /tmp or hidden folders, match each job to a change ticket, and read cron's own lines in syslog: REPLACE shows when a crontab changed, CMD shows every run.`,
-      ar: `cron بيشغّل المهام المجدولة. مهام النظام موجودة بـ /etc/crontab و /etc/cron.d/ (مع عمود للمستخدم)؛ ومهام كل مستخدم بـ ${SPOOL}/<user> (crontab -l -u <user>). حقول الوقت الخمسة هي الدقيقة والساعة ويوم الشهر والشهر ويوم الأسبوع، فـ */10 معناها كل 10 دقايق. المهاجمين بيضيفوا مهمة بترجّع تشغّل برنامجهم عشان يضل الوصول بعد الانهيار وإعادة التشغيل (MITRE T1053.003). عشان تصطادها: اعرض كل ملفات crontab، ودوّر على برامج بـ /tmp أو مجلدات مخفية، واربط كل مهمة بتذكرة تغيير، واقرأ أسطر cron بـ syslog: REPLACE بتورّي إمتى تغيّر الملف، و CMD بتورّي كل تشغيل.`,
+      ar: 'خدمة cron تشغّل المهام المجدولة. مهام النظام موجودة في `/etc/crontab` وفي `/etc/cron.d/` (وفيها عمود للمستخدم)، ومهام كل مستخدم في `/var/spool/cron/crontabs/` (ويعرضها الأمر `crontab -l -u USER`). حقول الوقت الخمسة هي الدقيقة والساعة ويوم الشهر والشهر ويوم الأسبوع، فالصيغة `*/10` تعني كل 10 دقائق. المهاجمون يضيفون مهمة تعيد تشغيل برنامجهم ليبقى وصولهم بعد الأعطال وإعادة التشغيل (MITRE T1053.003). للبحث عنها: اعرض كل ملفات المهام، وابحث عن برامج في `/tmp` أو في مجلدات مخفية، واجعل لكل مهمة تذكرة تغيير، واقرأ أسطر cron في syslog: كلمة `REPLACE` تبيّن متى تغيّر الملف، وكلمة `CMD` تبيّن كل تشغيل.',
     },
     realTools: ['crontab -l -u USER', 'systemctl list-timers', 'osquery (crontab table)', 'auditd / Wazuh file integrity monitoring'],
     takeaway: {
       en: 'Every scheduled job needs an owner and a ticket. A job that runs something from /tmp is guilty until proven innocent.',
-      ar: 'كل مهمة مجدولة لازم يكون إلها صاحب وتذكرة. والمهمة اللي بتشغّل إشي من /tmp متّهمة لحد ما تثبت براءتها.',
+      ar: 'كل مهمة مجدولة تحتاج إلى مالك وتذكرة. والمهمة التي تشغّل شيئاً من `/tmp` متّهمة إلى أن تثبت براءتها.',
     },
     source: 'MITRE ATT&CK T1053.003 (Scheduled Task/Job: Cron); crontab(1) and crontab(5) manual pages',
   },
   echo: {
-    intro: { en: 'Every beacon needs a heartbeat. Find the clock that keeps this one alive.', ar: 'كل برنامج اتصال بده نبض. لاقي الساعة اللي مخلّية هاد عايش.' },
+    intro: { en: 'Every beacon needs a heartbeat. Find the clock that keeps this one alive.', ar: 'كل برنامج اتصال يحتاج إلى نبض. اعثر على الساعة التي تُبقي هذا البرنامج حياً.' },
     success: {
       en: `A heartbeat every ten minutes, ${RUNS} times and counting. You have every piece now. Time to put the whole night in order.`,
-      ar: `نبضة كل عشر دقايق، ${RUNS} مرة ولسا عم تعدّ. صار معك كل القطع. إجا وقت ترتّب الليلة كلها.`,
+      ar: 'نبضة كل عشر دقائق، 216 مرة حتى الآن والعدّ مستمر. أصبحت كل القطع معك. حان وقت ترتيب أحداث الليلة كلها.',
     },
   },
   solution: `ls -l ${SPOOL} -> j.ortiz (Mar 13 03:50). crontab -l -u j.ortiz -> ${ACT4.cronLine}, "(- installed" = from a pipe. grep -c "sync --quiet" ${SYSLOG} = ${RUNS}. ${CMDLOG} has no crontab command; .sync was running since 03:49 -> beacon.`,

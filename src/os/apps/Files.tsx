@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { play } from '../../audio/sfx';
 import { useRuntime } from '../../engine/runtime';
 import { baseName, parentOf, type VNode } from '../../engine/vfs';
+import { useI18n } from '../../i18n';
 import './apps.css';
 
 /** Graphical file explorer over the same read-only virtual filesystem as the terminal. */
 export default function Files() {
+  const { t } = useI18n();
   const runtime = useRuntime((state) => state.runtime)!;
   const { vfs } = runtime;
   const [cwd, setCwd] = useState(vfs.home);
@@ -34,13 +36,13 @@ export default function Files() {
           })}
         </div>
         <label className="hidden-toggle">
-          <input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} /> show hidden
+          <input type="checkbox" checked={showHidden} onChange={(event) => setShowHidden(event.target.checked)} /> {t('files.showHidden')}
         </label>
       </div>
       <div className="files-main">
         <table className="files-table mono">
           <thead>
-            <tr><th>name</th><th>size</th><th>modified</th><th>mode</th></tr>
+            <tr><th>{t('files.name')}</th><th>{t('files.size')}</th><th>{t('files.modified')}</th><th>{t('files.mode')}</th></tr>
           </thead>
           <tbody>
             {entries.map((node) => (
@@ -61,7 +63,7 @@ export default function Files() {
                 <td>{node.type === 'dir' ? 'drwxr-xr-x' : node.file?.mode}</td>
               </tr>
             ))}
-            {entries.length === 0 && <tr><td colSpan={4} className="dim">(empty)</td></tr>}
+            {entries.length === 0 && <tr><td colSpan={4} className="dim">{t('files.empty')}</td></tr>}
           </tbody>
         </table>
         {open && (

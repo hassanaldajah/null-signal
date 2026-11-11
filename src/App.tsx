@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { lazy, Suspense, useEffect } from 'react';
 import { preload, unlockAudio } from './audio/sfx';
-import { useDocumentLanguage } from './i18n';
+import { useDocumentLanguage, useI18n } from './i18n';
 import { useFlow } from './store/flow';
 import { useGame } from './store/game';
 import Boot from './scenes/Boot';
@@ -70,9 +70,10 @@ export default function App() {
 }
 
 function Loading() {
+  const { t } = useI18n();
   return (
     <div style={{ display: 'grid', placeItems: 'center', height: '100%' }}>
-      <span className="label">Loading…</span>
+      <span className="label">{t('common.loading')}</span>
     </div>
   );
 }

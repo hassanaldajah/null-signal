@@ -23,7 +23,7 @@ export default function Settings({ onClose }: { onClose: () => void }) {
 
   const importSave = async (file: File) => {
     const ok = file.size <= MAX_SAVE_BYTES && useGame.getState().importSave(await file.text());
-    toast(ok ? '✔ Save imported' : t('settings.importFailed'), ok ? 'success' : 'danger');
+    toast(ok ? `✔ ${t('settings.imported')}` : t('settings.importFailed'), ok ? 'success' : 'danger');
   };
 
   return (

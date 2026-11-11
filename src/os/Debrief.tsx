@@ -5,6 +5,7 @@ import { levelsInOrder } from '../levels/manifest';
 import { hasLevel } from '../levels/registry';
 import { useFlow } from '../store/flow';
 import { rankFor, useGame } from '../store/game';
+import Rich from '../ui/Rich';
 import { openApp } from './NexusOS';
 
 /** "What you learned": the real-world concept and tools after each case. */
@@ -41,7 +42,7 @@ export default function Debrief() {
         )}
         <section>
           <h3>{t('debrief.learned')}</h3>
-          <p>{tl(config.debrief.concept)}</p>
+          <p><Rich text={tl(config.debrief.concept)} /></p>
         </section>
         <section>
           <h3>{t('debrief.tools')}</h3>
@@ -51,10 +52,16 @@ export default function Debrief() {
         </section>
         <section>
           <h3>{t('debrief.takeaway')}</h3>
-          <p>{tl(config.debrief.takeaway)}</p>
+          <p><Rich text={tl(config.debrief.takeaway)} /></p>
           <p className="debrief-source">{t('debrief.source')}: {config.debrief.source}</p>
         </section>
-        {intelFound && <p className="intel-found">◆ {t('intel.found')}</p>}
+        {intelFound && <p className="intel-found">◆ {t('intel.found')} <Rich text={tl(intelFound.text)} /></p>}
+        {config.ghost && (
+          <p className="ghost-taunt">
+            <span className="label">{t('debrief.ghost')}</span>
+            <Rich text={tl(config.ghost.taunt)} />
+          </p>
+        )}
         <div className="debrief-actions">
           <button className="btn ghost" onClick={() => { useRuntime.setState({ finished: false }); openApp('evidence'); }}>
             {t('debrief.board')}

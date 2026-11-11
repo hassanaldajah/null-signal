@@ -10,6 +10,7 @@ import { hasLevel } from '../levels/registry';
 import { useFlow } from '../store/flow';
 import { rankFor, useGame } from '../store/game';
 import GlitchLogo from '../ui/GlitchLogo';
+import LangSwitch from '../ui/LangSwitch';
 import Settings from '../ui/Settings';
 import CityScene from './three/CityScene';
 import Effects from './three/Effects';
@@ -85,9 +86,10 @@ export default function Hub() {
           <span className="label">{t('hub.title')}</span>
         </div>
         <div className="hub-stats">
-          <span className="mono">{callsign || 'investigator'}</span>
+          <span className="hub-callsign">{callsign || t('hub.investigator')}</span>
           <Stat label={t('hub.score')} value={totalScore} />
           <Stat label={t('hub.evidence')} value={evidenceCount} />
+          <LangSwitch />
           <button className="btn ghost" onClick={() => { play('click'); setSettingsOpen(true); }}>
             {t('hub.settings')}
           </button>
@@ -145,6 +147,8 @@ export default function Hub() {
                 className="btn primary"
                 onClick={() => {
                   play('open');
+                  // Replay starts the case over; the best score and the evidence are kept.
+                  if (states[selected.id] === 'done') useGame.getState().restartLevel(selected.id);
                   openLevel(selected.id);
                 }}
               >

@@ -5,6 +5,7 @@ import { useRuntime } from '../engine/runtime';
 import type { World } from '../engine/schema';
 import { useI18n } from '../i18n';
 import { EMPTY_LIST } from '../store/empty';
+import Rich from '../ui/Rich';
 import './apps/apps.css';
 
 type Lock = NonNullable<World['lockscreen']>;
@@ -59,7 +60,7 @@ export default function Lockscreen({ lock, onUnlocked }: { lock: Lock; onUnlocke
         />
         {wrong && <div className="lock-wrong">{t('lock.wrong')}</div>}
         <button className="btn primary" type="submit" disabled={!value}>{t('lock.unlock')}</button>
-        {lock.hint && <p className="lock-hint">{tl(lock.hint)}</p>}
+        {lock.hint && <p className="lock-hint"><Rich text={tl(lock.hint)} /></p>}
       </motion.form>
     </motion.div>
   );
